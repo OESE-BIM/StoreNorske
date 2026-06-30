@@ -216,7 +216,7 @@
   tbody td:first-child{font-family:"Space Grotesk",sans-serif;font-weight:600;color:var(--ink);white-space:nowrap;}
   td .tag{font-size:.82em;}
 
-  /* ---------- CANDIDATES (Plant View) ---------- */
+  /* ---------- CANDIDATES (AutoCAD Plant 3D) ---------- */
   .cand{display:grid;gap:12px;margin:18px 0;}
   .cand .item{
     background:var(--surface);border:1px solid var(--line);
@@ -356,7 +356,7 @@
           <rect class="nbox" x="40" y="30" width="156" height="32" rx="8"/><text x="58" y="51">Revit</text>
           <rect class="nbox" x="40" y="82" width="156" height="32" rx="8"/><text x="58" y="103">Tekla</text>
           <rect class="nbox" x="40" y="134" width="156" height="32" rx="8"/><text x="58" y="155">AutoCAD 3D</text>
-          <rect class="nbox" x="40" y="186" width="156" height="32" rx="8"/><text x="58" y="207">Plant View</text>
+          <rect class="nbox" x="40" y="186" width="156" height="32" rx="8"/><text x="58" y="207">AutoCAD Plant 3D</text>
           <rect class="nbox" x="40" y="238" width="156" height="32" rx="8"/><text x="58" y="259">Novapoint</text>
         </g>
 
@@ -375,11 +375,10 @@
 </header>
 
 <dl class="memo">
-  <dt>Til</dt><dd>Ørjan</dd>
   <dt>Tema</dt><dd>Oppsett av «Shared parameters» i prosjektet</dd>
   <dt>Verktøy</dt>
   <dd class="tools">
-    <span>Revit</span><span>Tekla</span><span>AutoCAD 3D</span><span>Plant View</span><span>Novapoint</span>
+    <span>Revit</span><span>Tekla</span><span>AutoCAD 3D</span><span>AutoCAD Plant 3D</span><span>Novapoint</span>
   </dd>
 </dl>
 
@@ -387,7 +386,7 @@
 
   <!-- INTRO -->
   <section class="block">
-    <p class="lead">Hei Ørjan! Du har sagt at du vil lære deg å sette opp delte parametere selv, i stedet for å bestille det. Det er en veldig god idé — og den viktigste innsikten er faktisk enklere enn folk tror. Denne guiden tar deg fra null til et fungerende oppsett, og forklarer både <em>hva</em> du gjør i Revit og <em>hvorfor</em> det henger sammen med de andre fagene.</p>
+    <p class="lead">Å lære seg å sette opp delte parametere selv, i stedet for å bestille det, er en god idé — og den viktigste innsikten er faktisk enklere enn folk tror. Denne guiden tar deg fra null til et fungerende oppsett, og forklarer både <em>hva</em> du gjør i Revit og <em>hvorfor</em> det henger sammen med de andre fagene.</p>
   </section>
 
   <!-- 1 -->
@@ -404,7 +403,7 @@
       <li><span class="t">Tekla Structures</span><span>User-Defined Attributes (UDA-er) + template-attributter</span></li>
       <li><span class="t">AutoCAD</span><span>Object Data / blokk-attributter / XDATA — i Plant 3D: egenskaper styrt av komponent-spec</span></li>
       <li><span class="t">Novapoint (Quadri)</span><span>Egne objekt-attributter / «generic properties»</span></li>
-      <li><span class="t">Plant View</span><span>Eget attributtsystem (se punkt 4 — navnet er litt tvetydig)</span></li>
+      <li><span class="t">AutoCAD Plant 3D</span><span>Eget attributtsystem (Project Properties / spec-egenskaper) — se punkt 4</span></li>
     </ul>
 
     <p>Så hva er det som <strong>binder alt sammen?</strong> Det er <strong>utvekslingsformatet</strong>, og i praksis er det nesten alltid <strong>IFC</strong> — nærmere bestemt <strong>Property Sets (Psets)</strong> inne i IFC-modellen.</p>
@@ -524,7 +523,7 @@
         </thead>
         <tbody>
           <tr>
-            <td>Revit <em>(ditt)</em></td>
+            <td>Revit</td>
             <td>Shared Parameters (GUID, <span class="tag">.txt</span>-fil)</td>
             <td>Psets via auto-mapping eller user-defined mappingfil</td>
           </tr>
@@ -544,35 +543,20 @@
             <td>Via «conversion rules»; bruk tegnet <span class="tag">|</span> i navnet for å definere property set</td>
           </tr>
           <tr>
-            <td>Plant View</td>
-            <td>Eget attributtsystem (se under)</td>
-            <td>IFC-eksport (se under)</td>
+            <td>AutoCAD Plant 3D</td>
+            <td>Project Properties / spec-egenskaper på komponentene</td>
+            <td>Ikke innebygd i Plant 3D selv — krever Civil 3D/Map 3D-koblingen eller en tredjeparts IFC-eksportør</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <h3>Om «Plant View» — en ærlig avklaring</h3>
-    <p>Dette navnet er <strong>tvetydig</strong>. Jeg fant ikke ett produkt merket nøyaktig «Plant View» som både bærer egne attributter og eksporterer IFC. I en nordisk anleggs-/industrikontekst, sammen med Tekla/Revit/AutoCAD/Novapoint, peker det mest sannsynlig mot et <strong>prosessanleggs-/3D-designverktøy</strong>. De to mest sannsynlige kandidatene:</p>
-
-    <div class="cand">
-      <div class="item">
-        <h4>AVEVA E3D / PDMS</h4>
-        <p>Det globale standardverktøyet for prosessanlegg (rør, utstyr, stål). Attributtmekanismen heter <strong>UDA-er</strong>, og IFC-eksport er innebygd (standard IFC2x3, IFC4 valgbar). Dokumentert Tekla ↔ AVEVA-kobling finnes.</p>
-      </div>
-      <div class="item">
-        <h4>CADMATIC (Plant Modeller / eShare)</h4>
-        <p>Finsk/nordisk anleggs- og marin-designverktøy, svært utbredt i Norden. Mekanismen heter rett og slett <strong>attributter</strong>, og Plant Modeller eksporterer IFC (Model → Export → IFC, valgbart skjema).</p>
-      </div>
-      <div class="item viewer">
-        <h4>CAXperts UniversalPlantViewer <em>— navnemessig nær, men en viewer</em></h4>
-        <p>Leser modeller og attributter, men lager ikke UDA-er og eksporterer ikke IFC. Bare relevant hvis «Plant View» i prosjektet er <em>visnings-/koordineringslaget</em>, ikke en design-kilde.</p>
-      </div>
-    </div>
+    <h3>Om AutoCAD Plant 3D</h3>
+    <p>AutoCAD Plant 3D er Autodesks eget prosessanleggsverktøy (P&amp;ID + 3D-modellering) — en naturlig del av verktøyflyten siden AutoCAD allerede er i bruk i prosjektet. Egendata bæres som <strong>Project Properties</strong> / spec-egenskaper på komponentene, ikke som en delt parameterfil slik som i Revit.</p>
 
     <div class="callout note">
-      <span class="ctag">Anbefaling</span>
-      <p>Bekreft med fagansvarlig hva «Plant View» faktisk er i <strong>dette</strong> prosjektet — et design-verktøy (sannsynligvis AVEVA E3D eller CADMATIC) eller en modell-viewer. Da vet vi nøyaktig hvordan det bærer data og eksporterer IFC.</p>
+      <span class="ctag">Viktig</span>
+      <p>Plant 3D har ikke innebygd IFC-eksport på samme måte som Revit. Eksport krever enten Civil 3D/Map 3D-koblingen, eller en tredjeparts IFC-eksportør. Avklar med fagansvarlig hvilken løsning som brukes i prosjektet, slik at egenskapene faktisk havner i IFC-en på avtalt sted.</p>
     </div>
 
     <p><strong>Poenget uansett:</strong> alle fagene må legge «samme logiske egenskap» på et avtalt sted i IFC. Det er derfor steg null (spesifikasjonen) er så viktig — den er «kontrakten» som alle verktøyoppsettene avledes fra.</p>
@@ -619,8 +603,8 @@
         <ul>
           <li><a href="https://support.tekla.com/">Tekla User Assistance</a> — søk: «Create property sets for IFC export». UDA-er og IFC-eksport. <span class="lng">EN</span></li>
           <li><a href="https://help.novapoint.com/">Novapoint / Quadri Help</a> — søk: «Export to IFC» / «Export Generic Properties». Bruk <span class="tag">|</span> i navnet. <span class="lng">EN</span></li>
-          <li><a href="https://www.aveva.com/">AVEVA E3D Design</a> — dok.: «User Defined Attributes (UDAs)» og «IFC Export Options». <span class="lng">EN</span></li>
           <li><a href="https://www.cadmatic.com/">CADMATIC</a> — dok.: «IFC import &amp; export» (Plant Modeller) og eShare-publisering. <span class="lng">EN</span></li>
+          <li><a href="https://help.autodesk.com/view/PLNT3D/">AutoCAD Plant 3D</a> — Autodesk Help. Project Properties / spec-egenskaper og eksportmuligheter. <span class="lng">EN</span></li>
         </ul>
       </div>
 
@@ -648,14 +632,13 @@
       <h2>Til slutt</h2>
       <p>Ikke la deg skremme av at dette har vært en «svart boks» tidligere. Selve Revit-oppsettet er overraskende mekanisk når du først har gjort det én gang — noen menyer, en tekstfil og en testeksport.</p>
       <p>Den virkelige verdien ligger i å forstå at delte parametere på tvers av fag egentlig er en <strong style="color:#fff">avtale om hvilke egenskaper som skal ligge hvor i IFC</strong>. Når du eier den forståelsen, kan du ikke bare bestille oppsettet — du kan lede det.</p>
-      <p class="sign">Lykke til, Ørjan! Spør gjerne underveis.</p>
+      <p class="sign">Lykke til – spør gjerne underveis.</p>
     </div>
   </section>
 </main>
 
 <footer>
-  <div class="print-tip">📄 For Teams: trykk Ctrl/Cmd + P → «Lagre som PDF» → legg ved i chatten.</div>
-  <div>Startguide · Delte parametere på tvers av fag (Revit · Tekla · AutoCAD 3D · Plant View · Novapoint). Lenker peker til offisiell dokumentasjon og norske standarder/byggherrekrav; enkelte tool-spesifikke sider må søkes opp på leverandørens hjelpesider.</div>
+  <div>Startguide · Delte parametere på tvers av fag (Revit · Tekla · AutoCAD 3D · AutoCAD Plant 3D · Novapoint). Lenker peker til offisiell dokumentasjon og norske standarder/byggherrekrav; enkelte tool-spesifikke sider må søkes opp på leverandørens hjelpesider.</div>
 </footer>
 
 </body>
