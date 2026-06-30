@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COWI BIM-leveranser</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #ECEAE6;
+  display: flex; align-items: center; justify-content: center;
+}
+#scene { display: flex; align-items: center; gap: 52px; padding: 32px; }
+svg#wheel {
+  display: block; flex-shrink: 0;
+  width: 820px; height: 820px;
+  filter: drop-shadow(0 16px 48px rgba(0,0,0,0.18));
+}
+.seg { cursor: pointer; }
+.seg-inner { transition: transform 0.42s cubic-bezier(0.34,1.45,0.64,1); }
+#detail {
+  width: 300px; flex-shrink: 0;
+  opacity: 0; transform: translateX(18px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+#detail.show { opacity:1; transform:translateX(0); }
+#det-chip {
+  display: inline-block; font-size: 10px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase; color: #fff;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 12px;
+}
+#det-title { font-size: 22px; font-weight: 800; color: #1a1a1a; line-height: 1.2; margin-bottom: 14px; }
+#det-divider { width: 36px; height: 3px; border-radius: 2px; margin-bottom: 18px; }
+#det-list { list-style: none; }
+#det-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: #444; line-height: 1.55; margin-bottom: 10px; }
+.det-dot { flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="scene">
+  <svg id="wheel" viewBox="0 0 820 820"></svg>
+  <div id="detail">
+    <div id="det-chip">BIM-leveranse</div>
+    <div id="det-title"></div>
+    <div id="det-divider"></div>
+    <ul id="det-list"></ul>
+  </div>
+</div>
+<script>
+const CX=410, CY=410;
+const R_OUT=380, R_OI=292, R_GI=155, R_II=95;
+
+// Palette: each entry is [dark, mid, light] for gradient depth
+const PALETTE = [
+  ['#1749C4','#2563EB','#5B8EF7'], // Modellering        — blå
+  ['#5B21B6','#7C3AED','#A87BF5'], // 3D-koordinering    — lilla
+  ['#047857','#059669','#34C490'], // Informasjonsutveks — smaragd
+  ['#991B1B','#DC2626','#F47272'], // Regelsjekking      — rød
+  ['#92400E','#D97706','#FBC24A'], // Kvalitetssikring   — amber
+  ['#0E7490','#0891B2','#38C7E0'], // Visualisering      — cyan
+  ['#86198F','#C026D3','#E270EF'], // Avanserte analyser — magenta
+  ['#166534','#16A34A','#4ADE80'], // Tegningsproduksjon — grønn
+  ['#9A3412','#EA580C','#FB8C50'], // Tidsplanlegging    — oransje
+  ['#3730A3','#4F46E5','#8B87F5'], // Mengdeuttak        — indigo
+  ['#075985','#0369A1','#38A7D4'], // Forvaltning        — havblå
+  ['#78350F','#B45309','#E09A3E'], // Kartlegging        — brun-gull
+];
+
+const GREY='#dddbd8', WHITE='#ffffff';
+const NS='http://www.w3.org/2000/svg';
+
+function el(tag,attrs={},text){
+  const e=document.createElementNS(NS,tag);
+  for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+  if(text!==undefined)e.textContent=text;
+  return e;
+}
+function f(n){return(+n).toFixed(3);}
+function px(r,a){return CX+r*Math.cos(a);}
+function py(r,a){return CY+r*Math.sin(a);}
+
+function annulus(r1,r2,a1,a2){
+  const lg=(a2-a1)>Math.PI?1:0;
+  return[
+    `M${f(px(r2,a1))} ${f(py(r2,a1))}`,
+    `A${r2} ${r2} 0 ${lg} 1 ${f(px(r2,a2))} ${f(py(r2,a2))}`,
+    `L${f(px(r1,a2))} ${f(py(r1,a2))}`,
+    `A${r1} ${r1} 0 ${lg} 0 ${f(px(r1,a1))} ${f(py(r1,a1))}`,
+    'Z'
+  ].join(' ');
+}
+
+const SEGS=[
+  { label:'Modellering',                    short:'Modellering',
+    items:['Prosjektering','Synkronisering mot rom- og utstyrsdatabaser','Scanning med laserscanner/drone','360-kamera','Konvertering av punktsky til modell'] },
+  { label:'3D-koordinering',                short:'3D-koordinering',
+    items:['Filutveksling','Eksport til åpne format','Bruk av modell i møter','Stikningsdata fra modell','Utveksling av informasjon mellom fagmodeller'] },
+  { label:'Informasjonsutveksling',         short:'Informasjons-\nutveksling',
+    items:['Stikningsdata fra modell','Utveksling av informasjon og parametre mellom fagmodeller'] },
+  { label:'Regelsjekking',                  short:'Regelsjekking',
+    items:['Kollisjonskontroll','Universell utforming','Brannkrav','Funksjonskrav'] },
+  { label:'Kvalitetssikring',               short:'Kvalitetssikring',
+    items:['Kontroll av fagmodell','Tverrfaglig kontroll'] },
+  { label:'Visualisering',                  short:'Visualisering',
+    items:['Presentasjoner ved bruk av modell','Stillbilder og filmer fra modell','Egne modeller for visualisering','Åpne modeller og kart på webtjenere'] },
+  { label:'Avanserte analyser',             short:'Avanserte\nanalyser',
+    items:['Statiske beregninger','Jordskjelvberegninger','Energiberegninger','Lysberegninger','Luftberegninger','Sprinklerberegninger','Varmebehovsberegninger'] },
+  { label:'Tegningsproduksjon',             short:'Tegnings-\nproduksjon',
+    items:['Hente tegninger og snitt fra modell','Skjema med info fra modell','Tegningslister'] },
+  { label:'Tidsplanlegging',                short:'Tidsplanlegging',
+    items:['Statussetting av objekter','Faseplanlegging','Fremdriftsplaner'] },
+  { label:'Mengdeuttak',                    short:'Mengdeuttak',
+    items:['Kalkyle','Mengdebeskrivelse (NS3420 / Prosesskode)','CO₂-regnskap fra modell'] },
+  { label:'Forvaltning, drift og vedlikehold', short:'Forvaltning,\ndrift og vedlh.',
+    items:['Koding av objekt for driftsfasen (TPM, NVD8, Banedata)','Oppdatering av modell (som bygget), eksport til modellserver'] },
+  { label:'Kartlegging / Konsultasjon',     short:'Kartlegging /\nKonsultasjon',
+    items:['Kartlegging av eksisterende situasjon','Konsultasjon og rådgivning','BIM-strategi for prosjekt'] }
+];
+
+const ICONS=[
+  g=>{g.appendChild(el('rect',{x:'-12',y:'-10',width:'21',height:'15',rx:'2.5'}));g.appendChild(el('line',{x1:'-2',y1:'5',x2:'-2',y2:'10'}));g.appendChild(el('line',{x1:'-8',y1:'10',x2:'4',y2:'10'}));g.appendChild(el('path',{d:'M7 1 L14-6 L11-9 L4-2 Z',fill:WHITE,stroke:'none'}));g.appendChild(el('line',{x1:'4',y1:'-2',x2:'2',y2:'3','stroke-width':'1.5'}));},
+  g=>{g.appendChild(el('path',{d:'M0-13 L12-6.5 L12 6.5 L0 13 L-12 6.5 L-12-6.5 Z',fill:'none'}));g.appendChild(el('line',{x1:'0',y1:'-13',x2:'0',y2:'0'}));g.appendChild(el('line',{x1:'12',y1:'-6.5',x2:'0',y2:'0'}));g.appendChild(el('line',{x1:'-12',y1:'-6.5',x2:'0',y2:'0'}));},
+  g=>{g.appendChild(el('circle',{cx:'0',cy:'5',r:'2.5',fill:WHITE,stroke:'none'}));g.appendChild(el('path',{d:'M-6-1 A7.5 7.5 0 0 1 6-1',fill:'none','stroke-width':'2'}));g.appendChild(el('path',{d:'M-11-6 A13 13 0 0 1 11-6',fill:'none','stroke-width':'2'}));g.appendChild(el('path',{d:'M-16-11 A19 19 0 0 1 16-11',fill:'none','stroke-width':'2'}));},
+  g=>{g.appendChild(el('path',{d:'M0-14 L13-8 L13 2 Q13 11 0 15 Q-13 11-13 2 L-13-8 Z',fill:'none','stroke-width':'2'}));g.appendChild(el('path',{d:'M-6 1 L-1 6 L7-5',fill:'none','stroke-width':'2.5','stroke-linecap':'round','stroke-linejoin':'round'}));},
+  g=>{g.appendChild(el('path',{d:'M0-13 L3.5-4.5 L13-4.5 L5.5 1.5 L8.5 11 L0 5.5 L-8.5 11 L-5.5 1.5 L-13-4.5 L-3.5-4.5 Z',fill:'none','stroke-width':'1.8'}));},
+  g=>{g.appendChild(el('path',{d:'M-14 0 Q0-12 14 0 Q0 12-14 0 Z',fill:'none','stroke-width':'2'}));g.appendChild(el('circle',{cx:'0',cy:'0',r:'5',fill:'none','stroke-width':'2'}));g.appendChild(el('circle',{cx:'0',cy:'0',r:'2',fill:WHITE,stroke:'none'}));},
+  g=>{g.appendChild(el('line',{x1:'-13',y1:'9',x2:'13',y2:'9'}));g.appendChild(el('line',{x1:'-13',y1:'-12',x2:'-13',y2:'9'}));g.appendChild(el('path',{d:'M-10 5 L-4-4 L2 1 L8-8 L13-3',fill:'none','stroke-width':'2.2'}));[[-10,5],[-4,-4],[2,1],[8,-8],[13,-3]].forEach(([cx,cy])=>g.appendChild(el('circle',{cx,cy,r:'2.2',fill:WHITE,stroke:'none'})));},
+  g=>{g.appendChild(el('path',{d:'M-10-14 L6-14 L13-7 L13 13 L-10 13 Z',fill:'none'}));g.appendChild(el('path',{d:'M6-14 L6-7 L13-7',fill:'none',opacity:'0.6'}));g.appendChild(el('line',{x1:'-6',y1:'-2',x2:'9',y2:'-2',opacity:'0.8'}));g.appendChild(el('line',{x1:'-6',y1:'4',x2:'9',y2:'4',opacity:'0.8'}));g.appendChild(el('line',{x1:'-6',y1:'10',x2:'3',y2:'10',opacity:'0.8'}));},
+  g=>{g.appendChild(el('circle',{cx:'0',cy:'0',r:'13',fill:'none','stroke-width':'2'}));g.appendChild(el('line',{x1:'0',y1:'0',x2:'0',y2:'-8','stroke-width':'2.5','stroke-linecap':'round'}));g.appendChild(el('line',{x1:'0',y1:'0',x2:'7',y2:'5','stroke-width':'2','stroke-linecap':'round'}));[0,90,180,270].forEach(deg=>{const a=deg*Math.PI/180;g.appendChild(el('circle',{cx:f(13*Math.cos(a)),cy:f(13*Math.sin(a)),r:'1.5',fill:WHITE,stroke:'none'}));});},
+  g=>{g.appendChild(el('rect',{x:'-13',y:'3',width:'7',height:'8',rx:'1.5',fill:WHITE,stroke:'none'}));g.appendChild(el('rect',{x:'-4',y:'-5',width:'7',height:'16',rx:'1.5',fill:WHITE,stroke:'none',opacity:'0.85'}));g.appendChild(el('rect',{x:'5',y:'-12',width:'7',height:'23',rx:'1.5',fill:WHITE,stroke:'none',opacity:'0.7'}));g.appendChild(el('line',{x1:'-14',y1:'11',x2:'14',y2:'11','stroke-width':'2'}));},
+  g=>{g.appendChild(el('path',{d:'M10-8 A13 13 0 1 0 13 3',fill:'none','stroke-width':'2.2'}));g.appendChild(el('path',{d:'M13 3 L13-4 L7 3 Z',fill:WHITE,stroke:'none'}));},
+  g=>{g.appendChild(el('path',{d:'M0-14 A9 9 0 0 1 9-5 Q9 4 0 14 Q-9 4-9-5 A9 9 0 0 1 0-14 Z',fill:'none','stroke-width':'2'}));g.appendChild(el('circle',{cx:'0',cy:'-5',r:'4',fill:'none','stroke-width':'2'}));g.appendChild(el('line',{x1:'-14',y1:'14',x2:'14',y2:'14','stroke-width':'1.5',opacity:'0.5'}));}
+];
+
+const N=SEGS.length, SLICE=2*Math.PI/N, GAP=0.030;
+const START=-Math.PI/2-SLICE/2;
+const svg=document.getElementById('wheel');
+
+// ── Defs: per-segment radial gradients + glow filter ──────────────────────
+const defsEl=el('defs');
+
+// Glow filter
+const filt=el('filter',{id:'glow',x:'-35%',y:'-35%',width:'170%',height:'170%'});
+filt.appendChild(el('feGaussianBlur',{in:'SourceAlpha',stdDeviation:'8',result:'blur'}));
+const feFlood=el('feFlood',{result:'color'}); feFlood.setAttribute('flood-opacity','0.55');
+filt.appendChild(feFlood);
+filt.appendChild(el('feComposite',{in:'color',in2:'blur',operator:'in',result:'shadow'}));
+const feMerge=el('feMerge');
+feMerge.appendChild(el('feMergeNode',{in:'shadow'}));
+feMerge.appendChild(el('feMergeNode',{in:'SourceGraphic'}));
+filt.appendChild(feMerge);
+defsEl.appendChild(filt);
+
+// Radial gradient for grey ring — subtle inner glow
+const gGrey=el('radialGradient',{id:'greyGrad',cx:'50%',cy:'50%',r:'50%',gradientUnits:'userSpaceOnUse',
+  fx:CX,fy:CY,x1:CX,y1:CY,x2:CX,y2:CY});
+gGrey.setAttribute('gradientUnits','userSpaceOnUse');
+gGrey.setAttribute('cx',CX); gGrey.setAttribute('cy',CY); gGrey.setAttribute('r',R_OI);
+gGrey.appendChild(el('stop',{offset:'0%','stop-color':'#eceae6'}));
+gGrey.appendChild(el('stop',{offset:'100%','stop-color':'#d3d1ce'}));
+defsEl.appendChild(gGrey);
+
+// Per-segment arc gradients (radial, dark inner → light outer)
+PALETTE.forEach(([dark,mid,light],i)=>{
+  const gId=`sg${i}`;
+  const g=el('radialGradient',{id:gId,gradientUnits:'userSpaceOnUse',
+    cx:CX,cy:CY,r:R_OUT,fx:CX,fy:CY});
+  g.appendChild(el('stop',{offset:'0%','stop-color':dark}));
+  g.appendChild(el('stop',{offset:'60%','stop-color':mid}));
+  g.appendChild(el('stop',{offset:'100%','stop-color':light}));
+  defsEl.appendChild(g);
+
+  // Active (lighter) variant
+  const gIdA=`sg${i}a`;
+  const ga=el('radialGradient',{id:gIdA,gradientUnits:'userSpaceOnUse',
+    cx:CX,cy:CY,r:R_OUT,fx:CX,fy:CY});
+  ga.appendChild(el('stop',{offset:'0%','stop-color':mid}));
+  ga.appendChild(el('stop',{offset:'100%','stop-color':light}));
+  defsEl.appendChild(ga);
+
+  // Icon circle gradient (light centre → dark edge)
+  const gIdI=`si${i}`;
+  const gi=el('radialGradient',{id:gIdI,gradientUnits:'userSpaceOnUse'});
+  // Will set cx/cy/r per segment below — use userSpaceOnUse
+  gi.appendChild(el('stop',{offset:'0%','stop-color':light}));
+  gi.appendChild(el('stop',{offset:'100%','stop-color':dark}));
+  defsEl.appendChild(gi);
+});
+
+svg.appendChild(defsEl);
+
+// ── Static background ──────────────────────────────────────────────────────
+svg.appendChild(el('circle',{cx:CX,cy:CY,r:R_OI,fill:'url(#greyGrad)'}));
+svg.appendChild(el('circle',{cx:CX,cy:CY,r:R_GI,fill:WHITE}));
+
+let activeIdx=null;
+const segInners=[];
+
+SEGS.forEach((seg,i)=>{
+  const a1=START+i*SLICE+GAP/2;
+  const a2=START+(i+1)*SLICE-GAP/2;
+  const mid=(a1+a2)/2;
+  const dx=Math.cos(mid), dy=Math.sin(mid);
+  const [dark,midCol,light]=PALETTE[i];
+
+  const segG=el('g',{'class':'seg'});
+  const inner=el('g',{'class':'seg-inner'});
+
+  // Outer arc with gradient
+  const outerArc=el('path',{
+    d:annulus(R_OI,R_OUT,a1,a2),
+    fill:`url(#sg${i})`,stroke:WHITE,'stroke-width':'2.2'
+  });
+  inner.appendChild(outerArc);
+
+  // Grey middle arc (also with subtle gradient)
+  inner.appendChild(el('path',{
+    d:annulus(R_GI,R_OI,a1,a2),
+    fill:'url(#greyGrad)',stroke:WHITE,'stroke-width':'2.2'
+  }));
+
+  // Divider
+  inner.appendChild(el('line',{
+    x1:f(px(R_II+2,a1)),y1:f(py(R_II+2,a1)),
+    x2:f(px(R_OUT,a1)),y2:f(py(R_OUT,a1)),
+    stroke:'#bab8b5','stroke-width':'0.8','stroke-dasharray':'5 4'
+  }));
+
+  // Icon circle — update gradient coords per segment
+  const iconR=(R_GI+R_II)/2;
+  const icx=px(iconR,mid), icy=py(iconR,mid);
+
+  // Update icon gradient to match icon circle position
+  const iGrad=defsEl.querySelector(`#si${i}`);
+  if(iGrad){
+    iGrad.setAttribute('cx',f(icx)); iGrad.setAttribute('cy',f(icy));
+    iGrad.setAttribute('r','28');
+    iGrad.setAttribute('fx',f(icx-8)); iGrad.setAttribute('fy',f(icy-8));
+  }
+
+  const iconCirc=el('circle',{cx:f(icx),cy:f(icy),r:'26',
+    fill:`url(#si${i})`,stroke:WHITE,'stroke-width':'1'});
+  inner.appendChild(iconCirc);
+
+  // Icon drawing
+  const iconG=el('g',{
+    transform:`translate(${f(icx)},${f(icy)})`,
+    fill:'none',stroke:WHITE,
+    'stroke-width':'1.9','stroke-linecap':'round','stroke-linejoin':'round'
+  });
+  ICONS[i](iconG);
+  inner.appendChild(iconG);
+
+  // ── Label: ALWAYS UPRIGHT ────────────────────────────────────────────────
+  // Rule: text rotation = angle of segment midpoint + 90°
+  // For LEFT half (90° < midNorm < 270°): flip by +180° so it reads correctly
+  const labelR=(R_OI+R_OUT)/2;
+  const lx=px(labelR,mid), ly=py(labelR,mid);
+  const midDeg=mid*180/Math.PI;
+  const midNorm=((midDeg%360)+360)%360;
+
+  // Flip when base rotation would render text upside-down (baseNorm 90–270)
+  const baseRot = midDeg + 90;
+  const baseNorm = ((baseRot % 360) + 360) % 360;
+  const needsFlip = baseNorm > 90 && baseNorm < 270;
+  const textRot = baseRot + (needsFlip ? 180 : 0);
+
+  const rawLines=seg.short.split('\n');
+  const lines=[];
+  rawLines.forEach(raw=>{
+    if(raw.length<=14){lines.push(raw);return;}
+    const m=Math.floor(raw.length/2);
+    let sp=raw.lastIndexOf(' ',m);
+    if(sp<3)sp=raw.indexOf(' ',m);
+    if(sp<0){lines.push(raw);return;}
+    lines.push(raw.slice(0,sp));
+    lines.push(raw.slice(sp+1));
+  });
+
+  const LINE_H=13.5, totalH=(lines.length-1)*LINE_H;
+  lines.forEach((line,li)=>{
+    inner.appendChild(el('text',{
+      x:f(lx), y:f(ly - totalH/2 + li*LINE_H),
+      transform:`rotate(${f(textRot)},${f(lx)},${f(ly)})`,
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'Segoe UI,Arial,sans-serif',
+      'font-size':lines.length>1?'10.5':'11.5',
+      'font-weight':'800','fill':WHITE,'letter-spacing':'0.6'
+    },line.toUpperCase()));
+  });
+
+  segG.appendChild(inner);
+
+  segG.addEventListener('click',()=>{
+    if(activeIdx===i){
+      inner.style.transform='';
+      outerArc.setAttribute('fill',`url(#sg${i})`);
+      iconCirc.setAttribute('fill',`url(#si${i})`);
+      inner.style.filter='';
+      activeIdx=null;
+      document.getElementById('detail').classList.remove('show');
+      return;
+    }
+    if(activeIdx!==null){
+      const p=segInners[activeIdx];
+      p.inner.style.transform='';
+      p.outerArc.setAttribute('fill',`url(#sg${p.i})`);
+      p.iconCirc.setAttribute('fill',`url(#si${p.i})`);
+      p.inner.style.filter='';
+    }
+    inner.style.transform=`translate(${f(dx*24)}px,${f(dy*24)}px)`;
+    outerArc.setAttribute('fill',`url(#sg${i}a)`);
+    iconCirc.setAttribute('fill',light);
+    // Dynamic glow colour
+    defsEl.querySelector('#glow feFlood').setAttribute('flood-color',midCol);
+    inner.style.filter='url(#glow)';
+    activeIdx=i;
+    showPanel(seg,midCol);
+  });
+
+  svg.appendChild(segG);
+  segInners.push({inner,outerArc,iconCirc,i,col:midCol});
+});
+
+// Top rings
+svg.appendChild(el('circle',{cx:CX,cy:CY,r:R_GI,fill:'none',stroke:WHITE,'stroke-width':'2.5'}));
+svg.appendChild(el('circle',{cx:CX,cy:CY,r:R_II,fill:WHITE}));
+svg.appendChild(el('circle',{cx:CX,cy:CY,r:R_II+1,fill:'none',stroke:'#e0dedd','stroke-width':'1.5'}));
+
+// Centre: COWI logo (Playfair Display serif, matching brand)
+// Thin separator line above BIM-LEVERANSER
+svg.appendChild(el('line',{
+  x1:f(CX-28),y1:f(CY+8),x2:f(CX+28),y2:f(CY+8),
+  stroke:'#ddd','stroke-width':'0.8'
+}));
+// COWI wordmark
+svg.appendChild(el('text',{
+  x:CX, y:CY-8,
+  'text-anchor':'middle','dominant-baseline':'central',
+  'font-family':'"Playfair Display", Georgia, "Times New Roman", serif',
+  'font-size':'34','font-weight':'800',
+  'fill':'#E05A1C','letter-spacing':'3'
+},'COWI'));
+// BIM-LEVERANSER subtitle
+svg.appendChild(el('text',{
+  x:CX, y:CY+20,
+  'text-anchor':'middle','dominant-baseline':'central',
+  'font-family':'Segoe UI,Arial,sans-serif',
+  'font-size':'7.5','font-weight':'600',
+  'fill':'#b0aeab','letter-spacing':'3'
+},'BIM-LEVERANSER'));
+
+function showPanel(seg,col){
+  document.getElementById('det-chip').style.background=col;
+  document.getElementById('det-title').textContent=seg.label;
+  document.getElementById('det-divider').style.background=col;
+  const list=document.getElementById('det-list');
+  list.innerHTML='';
+  seg.items.forEach(item=>{
+    const li=document.createElement('li');
+    const dot=document.createElement('span');
+    dot.className='det-dot'; dot.style.background=col;
+    li.appendChild(dot);
+    li.appendChild(document.createTextNode(item));
+    list.appendChild(li);
+  });
+  document.getElementById('detail').classList.add('show');
+}
+</script>
+</body>
+</html>

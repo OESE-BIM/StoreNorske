@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modellbasert, tegningsfattig prosjekt – Prosessflyt</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,700&display=swap');
+
+:root {
+  --navy: #1C2B54;
+  --orange: #F04E23;
+  --maroon: #612141;
+  --teal: #31B18F;
+  --beige: #EFE1D6;
+  --cream: #FAF6F2;
+  --white: #FFFFFF;
+  --text: #2C2C2C;
+  --text-light: #6B6560;
+  --blue-light: #D2EAF7;
+  --blue-dark: #0C447C;
+  --green-light: #D5F0E9;
+  --green-dark: #04342C;
+  --yellow-light: #FFF2CC;
+  --yellow-dark: #7C5C00;
+  --grey: #F0EBE5;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); background: var(--cream); line-height: 1.6; }
+
+/* ─── HERO ─── */
+.hero {
+  background: var(--navy);
+  color: var(--white);
+  padding: 5rem 2rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 60%;
+  height: 200%;
+  background: radial-gradient(ellipse, rgba(49,177,143,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+.hero-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 1rem;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--orange);
+}
+.hero-sub {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.8);
+  max-width: 700px;
+}
+
+/* ─── PRINCIPLE BAR ─── */
+.principle {
+  background: var(--orange);
+  color: var(--white);
+  text-align: center;
+  padding: 1.2rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ─── SECTION ─── */
+.section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.5rem;
+}
+.section-sub {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin-bottom: 2.5rem;
+  max-width: 600px;
+}
+
+/* ─── DATA THREADS (signature element) ─── */
+.threads-bg { background: var(--white); }
+.threads-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.thread-card {
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  border-left: 4px solid;
+  position: relative;
+}
+.thread-card.model { background: var(--blue-light); border-color: var(--blue-dark); }
+.thread-card.tag { background: var(--green-light); border-color: var(--green-dark); }
+.thread-card.tegn { background: var(--yellow-light); border-color: var(--yellow-dark); }
+.thread-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+.thread-card.model h3 { color: var(--blue-dark); }
+.thread-card.tag h3 { color: var(--green-dark); }
+.thread-card.tegn h3 { color: var(--yellow-dark); }
+.thread-card p { font-size: 0.88rem; line-height: 1.6; }
+.thread-card.model p { color: var(--blue-dark); }
+.thread-card.tag p { color: var(--green-dark); }
+.thread-card.tegn p { color: var(--yellow-dark); }
+
+/* ─── PHASE TIMELINE ─── */
+.timeline-bg { background: var(--beige); }
+.phase-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.phase-tab {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.75rem 0.5rem;
+  border: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: rgba(28,43,84,0.08);
+  color: var(--text-light);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+}
+.phase-tab:hover { background: rgba(28,43,84,0.15); }
+.phase-tab.active {
+  background: var(--navy);
+  color: var(--white);
+}
+.phase-tab .mmi {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+.progress-bar {
+  display: flex;
+  gap: 4px;
+  height: 4px;
+  margin-bottom: 2rem;
+}
+.progress-seg {
+  flex: 1;
+  background: rgba(28,43,84,0.1);
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+/* ─── MMI FLOW ─── */
+.mmi-flow {
+  display: flex;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding: 1.2rem 0.5rem 0.5rem;
+  gap: 0;
+}
+.mmi-group {
+  flex: 1;
+  min-width: 70px;
+  height: 60px;
+  display: flex;
+  margin-left: -14px;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  position: relative;
+}
+.mmi-group:first-child {
+  margin-left: 0;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+}
+.mmi-group-label {
+  position: absolute;
+  top: -1.35rem;
+  left: 14px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+.mmi-group:first-child .mmi-group-label { left: 0; }
+.mmi-seg {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  transition: filter 0.15s, transform 0.15s;
+}
+.mmi-seg:hover { filter: brightness(1.1); }
+.mmi-seg.active {
+  box-shadow: inset 0 0 0 3px rgba(28,43,84,0.85);
+  transform: scaleY(1.1);
+  z-index: 2;
+}
+.mmi-detail {
+  display: none;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  margin-bottom: 2.5rem;
+}
+.mmi-detail.show { display: flex; gap: 1.25rem; align-items: flex-start; }
+.mmi-detail .mmi-badge {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.mmi-detail h4 { font-size: 1.05rem; color: var(--navy); margin-bottom: 0.3rem; }
+.mmi-detail p { font-size: 0.88rem; color: var(--text-light); line-height: 1.5; }
+.control-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.6rem;
+}
+.control-tag.konsept { background: rgba(230,150,55,0.15); color: #9a5e1c; }
+.control-tag.kollisjon { background: rgba(55,130,70,0.15); color: #235a30; }
+.control-tag.utforelse { background: rgba(30,70,175,0.12); color: #1E46AF; }
+.control-note {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  background: rgba(28,43,84,0.05);
+  border-left: 3px solid var(--navy);
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.6rem;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Phase detail card */
+.phase-detail {
+  display: none;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+}
+.phase-detail.active { display: block; }
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.phase-num {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+.phase-header h3 { font-size: 1.3rem; font-weight: 600; color: var(--navy); }
+.phase-header p { font-size: 0.9rem; color: var(--text-light); }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.detail-box {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+}
+.detail-box h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.detail-box ul { padding-left: 1.2rem; }
+.detail-box li { font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text); }
+
+/* Thread badges in phase detail */
+.thread-badges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.badge {
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+}
+.badge.model { background: var(--blue-light); }
+.badge.tag { background: var(--green-light); }
+.badge.tegn { background: var(--yellow-light); }
+.badge-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+.badge-val { font-size: 0.9rem; font-weight: 500; margin-top: 2px; }
+.badge.model .badge-label, .badge.model .badge-val { color: var(--blue-dark); }
+.badge.tag .badge-label, .badge.tag .badge-val { color: var(--green-dark); }
+.badge.tegn .badge-label, .badge.tegn .badge-val { color: var(--yellow-dark); }
+.badge-val.empty { opacity: 0.4; font-style: italic; }
+
+.meta-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.meta-box {
+  background: var(--grey);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+}
+.meta-box h5 { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-light); margin-bottom: 0.3rem; }
+.meta-box p { font-size: 0.88rem; color: var(--text); }
+
+.datathread-narrative {
+  border-left: 3px solid var(--navy);
+  padding: 1rem 1.25rem;
+  background: rgba(28,43,84,0.03);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.datathread-narrative h4 { font-size: 0.85rem; font-weight: 600; color: var(--navy); margin-bottom: 0.4rem; }
+.datathread-narrative p { font-size: 0.9rem; color: var(--text); line-height: 1.7; }
+
+/* Nav buttons */
+.phase-nav-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+.nav-btn {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid rgba(28,43,84,0.2);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--navy);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: var(--beige); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ─── OVERVIEW FLOW ─── */
+.overview-bg { background: var(--white); }
+.flow-row {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+.flow-box {
+  flex: 1;
+  min-width: 90px;
+  padding: 0.8rem 0.3rem;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.flow-box .flow-mmi { font-size: 0.65rem; font-weight: 400; opacity: 0.7; margin-top: 3px; }
+
+.lane {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+.lane-label {
+  width: 100px;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.lane-cells { display: flex; gap: 3px; flex: 1; }
+.lane-cell {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.4rem 0.25rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.3;
+}
+.lane-cell.empty { opacity: 0.4; font-style: italic; }
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.8rem;
+}
+footer strong { color: var(--white); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .threads-grid, .detail-grid, .thread-badges, .meta-row { grid-template-columns: 1fr; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .section { padding: 2.5rem 1.5rem; }
+  .phase-tab { min-width: 80px; font-size: 0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Prosessflyt · Modellbasert prosjekt</div>
+    <h1>Modellen er leveransen.<br>Tegninger er <em>unntaket</em>.</h1>
+    <p class="hero-sub">
+      En komplett prosessflyt fra idé til drift for modellbaserte, tegningsfattige prosjekter.
+      Tre datatråder følger prosjektet gjennom hele livsløpet: BIM-modellen, utstyrstagging med datablad, 
+      og tegninger — kun der de er nødvendige.
+    </p>
+  </div>
+</div>
+
+<div class="principle">
+  Prinsipp: Modellen er primærleveransen. Tag + datablad følger objektet fra prosjektering til drift. Tegninger produseres kun med begrunnelse.
+</div>
+
+<!-- DATA THREADS -->
+<div class="threads-bg">
+  <div class="section">
+    <div class="section-title">Tre datatråder</div>
+    <p class="section-sub">Gjennom hele livsløpet lever tre parallelle datatråder som berikes fra fase til fase.</p>
+    <div class="threads-grid">
+      <div class="thread-card model">
+        <h3>BIM-modell</h3>
+        <p>Starter som volummodell (MMI 100) i idéfasen og modnes til verifisert as-built (MMI 500). 
+        Leveres som IFC — åpent format — og lever videre som navigasjonsverktøy i drift i 20–50 år.</p>
+      </div>
+      <div class="thread-card tag">
+        <h3>Tag + datablad</h3>
+        <p>Hvert utstyr får unik tag-ID i forprosjekt. Egenskaper berikes gjennom prosjektering, 
+        leverandør-datablad erstatter generiske ved anskaffelse, og komplett datasett (datablad, sertifikat, 
+        driftsinstruks) kobles til objektet i modellen for overlevering til drift.</p>
+      </div>
+      <div class="thread-card tegn">
+        <h3>Tegninger (kun nødvendige)</h3>
+        <p>Tegninger produseres kun der det er en konkret begrunnelse: P&ID for myndigheter, 
+        montasjedetaljer som ikke fungerer i 3D, kontraktuelle forpliktelser. 
+        Alt annet kommuniseres via modellen.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MMI FLOW -->
+<div class="section">
+  <div class="section-title">MMI-nivåer</div>
+  <p class="section-sub">Modell Modenhets Indeks — klikk på et nivå for å se definisjonen (EBA MMI-veileder 2.0).</p>
+
+  <div class="mmi-flow" id="mmiFlow"></div>
+  <div class="mmi-detail" id="mmiDetail"></div>
+</div>
+
+<!-- PHASE TIMELINE -->
+<div class="timeline-bg">
+  <div class="section">
+    <div class="section-title">Åtte faser</div>
+    <p class="section-sub">Klikk på en fase for å se aktiviteter, modellmodenhet, verktøy og datatråd.</p>
+
+    <div class="phase-nav" id="phaseTabs"></div>
+    <div class="progress-bar" id="progressBar"></div>
+    <div id="phaseCards"></div>
+  </div>
+</div>
+
+<footer>
+  <strong>Produktnøytral prosessflyt</strong> · Modellbasert, tegningsfattig prosjekt · Fra idé til drift
+</footer>
+
+<script>
+// MMI-veileder 2.0, tabell 1 — grunnleggende MMI-nivåer (EBA/RIF/MEF/AiN/Statsbygg/Bane NOR/Nye Veier)
+const mmiLevels = [
+  {code:"000", name:"Tidligfase", color:"#D73296", text:"#fff", group:0,
+   desc:"Prosesser som går forut for byggeprosjektet, eksempelvis planprosesser, arkitektkonkurranser el. lign."},
+  {code:"100", name:"Grunnlagsinformasjon", color:"#BE2823", text:"#fff", group:1, primary:true,
+   desc:"Objekter og informasjon etablert som grunnlag for utvikling av prosjektet."},
+  {code:"125", name:"Etablert konsept", color:"#D24B46", text:"#fff", group:1,
+   desc:"Konsepter er etablert og danner grunnlag for koordinering fram til utført tverrfaglig kontroll."},
+  {code:"150", name:"Tverrfaglig kontrollert konsept", color:"#E17873", text:"#fff", group:1,
+   desc:"Tverrfaglig kontroll er gjennomført og eventuelle avvik er rettet til akseptabelt nivå.",
+   control:{type:"konsept", label:"Konseptuell kontroll", note:"Romlig/funksjonell samstemming mellom fag — ikke geometrisk kollisjonstest. Modellen har ikke detaljert nok geometri for objektnivå-kontroll ennå."}},
+  {code:"175", name:"Valgt konsept", color:"#F0AAAA", text:"#1C2B54", group:1,
+   desc:"Konseptuelle løsninger valgt og klar for beslutning om videre utvikling."},
+  {code:"200", name:"Ferdig konsept", color:"#E69637", text:"#fff", group:2, primary:true,
+   desc:"Konseptuelle løsninger er besluttet, klargjort for utvikling av prinsipielle løsninger."},
+  {code:"225", name:"Etablert prinsipielle løsninger", color:"#EBAF64", text:"#1C2B54", group:2,
+   desc:"Prinsipielle løsninger er etablert og danner grunnlag for videre koordinering fram til utført tverrfaglig kontroll."},
+  {code:"250", name:"Tverrfaglig kontrollert prinsipielle løsninger", color:"#F0C88C", text:"#1C2B54", group:2,
+   desc:"Tverrfaglig kontroll er gjennomført og eventuelle avvik er rettet til akseptabelt nivå.",
+   control:{type:"konsept", label:"Konseptuell kontroll", note:"Kontroll av systemvalg og grensesnitt mellom fag på prinsippnivå — ikke automatisert kollisjonstest."}},
+  {code:"275", name:"Valgt prinsipielle løsninger", color:"#F5E6D7", text:"#1C2B54", group:2,
+   desc:"Prinsipielle løsninger valgt og klargjort for beslutning om videre utvikling."},
+  {code:"300", name:"Underlag for detaljering", color:"#FAF050", text:"#1C2B54", group:3, primary:true,
+   desc:"Prinsipielle løsninger er utviklet og besluttet, klargjort som underlag for videre detaljering."},
+  {code:"325", name:"Etablert detaljerte løsninger", color:"#D7CD41", text:"#1C2B54", group:3,
+   desc:"Byggbare løsninger er etablert og danner grunnlag for videre koordinering fram til utført tverrfaglig kontroll."},
+  {code:"350", name:"Tverrfaglig kontrollert detaljerte løsninger", color:"#B9AF3C", text:"#fff", group:3,
+   desc:"Tverrfaglig kontroll er gjennomført og eventuelle avvik er rettet til akseptabelt nivå.",
+   control:{type:"kollisjon", label:"Geometrisk kollisjonskontroll", note:"Dette er nivået der faktisk kollisjonskontroll (Solibri/Navisworks) gir mening — objektgeometrien (rør, kanaler, kabelbaner, konstruksjon) er moden nok til regelbasert testing."}},
+  {code:"375", name:"Detaljerte løsninger som grunnlag for anbud / bestilling / prefabrikasjon", color:"#9B9632", text:"#fff", group:3,
+   desc:"Godkjent grunnlag for bestilling, prefabrikasjon, leverandørprosjektering, anbudsgrunnlag (generalentreprise)."},
+  {code:"400", name:"Arbeidsgrunnlag", color:"#378246", text:"#fff", group:4, primary:true,
+   desc:"Klart for utførelse på byggeplass. Underlaget kan også brukes for bestilling, planlegging, utførelse og dokumentasjon."},
+  {code:"425", name:"Etablert / utført", color:"#4BAA5A", text:"#fff", group:4,
+   desc:"Løsninger er utført på byggeplass."},
+  {code:"450", name:"Kontrollert utførelse", color:"#64C37D", text:"#1C2B54", group:4,
+   desc:"Utførelse er kontrollert mot prosjektert løsning, og evt. endringer mot faktisk utførelse er innarbeidet i modell.",
+   control:{type:"utforelse", label:"Fysisk utførelseskontroll", note:"Kontroll på byggeplass mot prosjektert løsning — ikke en modellbasert test, men en fysisk verifikasjon som speiles tilbake i modellen."}},
+  {code:"475", name:"Godkjent utførelse", color:"#9BD7A5", text:"#1C2B54", group:4,
+   desc:"Faktisk utførelse er godkjent og all informasjon levert iht. krav, f.eks. i henhold til systematisk ferdigstillelse."},
+  {code:"500", name:"Som bygget", color:"#1E46AF", text:"#fff", group:5, primary:true,
+   desc:"Leveranse iht. bestilling overdratt fra leverandør til bestiller."},
+  {code:"600", name:"I drift", color:"#9B00CD", text:"#fff", group:6, primary:true,
+   desc:"Klargjort driftsunderlag overdratt fra bestiller til driftsorganisasjon."}
+];
+
+const mmiFlowEl = document.getElementById('mmiFlow');
+const mmiDetailEl = document.getElementById('mmiDetail');
+
+// Grupper nivåene etter primærnivå (000, 100-gruppe, 200-gruppe osv.)
+const mmiGroups = {};
+mmiLevels.forEach(l => { (mmiGroups[l.group] = mmiGroups[l.group] || []).push(l); });
+
+Object.values(mmiGroups).forEach(group => {
+  const wrap = document.createElement('div');
+  wrap.className = 'mmi-group';
+  const label = document.createElement('div');
+  label.className = 'mmi-group-label';
+  label.textContent = group[0].code + ' · ' + group[0].name;
+  wrap.appendChild(label);
+  group.forEach(level => {
+    const seg = document.createElement('button');
+    seg.className = 'mmi-seg';
+    seg.style.background = level.color;
+    seg.style.color = level.text;
+    seg.textContent = level.code;
+    seg.onclick = () => showMmi(level.code);
+    wrap.appendChild(seg);
+  });
+  mmiFlowEl.appendChild(wrap);
+});
+
+function showMmi(code) {
+  const level = mmiLevels.find(l => l.code === code);
+  document.querySelectorAll('.mmi-seg').forEach(s => s.classList.toggle('active', s.textContent === code));
+  mmiDetailEl.className = 'mmi-detail show';
+  const tag = level.control
+    ? `<div class="control-tag ${level.control.type}">${level.control.label}</div>`
+    : '';
+  const note = level.control
+    ? `<div class="control-note">${level.control.note}</div>`
+    : '';
+  mmiDetailEl.innerHTML = `
+    <div class="mmi-badge" style="background:${level.color};color:${level.text}">${level.code}</div>
+    <div>
+      ${tag}
+      <h4>${level.name}</h4>
+      <p>${level.desc}</p>
+      ${note}
+    </div>
+  `;
+}
+showMmi('150');
+
+const phases = [
+  {name:"Idé / konsept",lod:"MMI 100",color:"#BE2823",mmi:"#BE2823",badges:["100"],
+   sub:"Behov, mulighetsstudie, overordnet løsning",
+   acts:["Behovskartlegging og funksjonsanalyse","Overordnet konseptvalg (skissemodell)","Tidlig kostnadsestimat (±30 %)","Forutsetninger for regulering/dispensasjon"],
+   model:["Volummodell / massestudie","Plassering i terreng (GIS/punktsky)","Ingen objektinformasjon ennå"],
+   bim:"Volummodell",tag:"Utkast",tegn:"—",
+   tools:"Skisseverktøy · CDE (dokumentlagring) · GIS / terrengdata",
+   users:"Byggherre, rådgiver",
+   thread:"Modellen starter som volum uten detaljer. Ingen tegninger produseres — konseptet kommuniseres via 3D-visninger og skjermbilder. Utstyrsregister etableres som utkast med hovedkomponenter."},
+  {name:"Forprosjekt",lod:"MMI 200",color:"#E69637",mmi:"#E69637",badges:["200"],
+   sub:"Systemvalg, hovedlayout, kostnadsramme",
+   acts:["Systemvalg og hovedlayout","P&ID / systemdiagrammer","Kostnadsestimat (±20 %)","Grensesnittmatrise mot andre fag","Myndighetssøknader"],
+   model:["Generisk geometri med tilnærmet størrelse","Plassering av hovedutstyr","Terrengmodell (punktsky/overflate)"],
+   bim:"Generisk geometri",tag:"Tag-ID etablert, generiske datablad",tegn:"P&ID (myndighetskrav)",
+   tools:"BIM-forfatterverktøy · CDE · Tidlig QA-verktøy · 3D-viewer",
+   users:"Prosjekteringsteam",
+   thread:"Første utstyrstagging etableres i modellen — hvert hovedkomponent får unik tag-ID. P&ID-er er de første tegningene som produseres (systemkritiske, myndighetskrav). Datablad-PDF-er begynner å kobles til tag i CDE."},
+  {name:"Detaljprosjektering",lod:"MMI 300–350",color:"#B9AF3C",mmi:"#D7CD41",badges:["300","325","350"],
+   sub:"Byggbart underlag, tverrfaglig koordinering",
+   acts:["Full tverrfaglig prosjektering","Regelbasert kollisjonskontroll","MMI-oppfølging (300→500)","Mengdeuttak (QTO) fra modell","Spesifikasjoner og datablad"],
+   model:["Nøyaktig geometri, alle fag koordinert","Utstyr tagget med egenskaper","Kabelbaner, rør, kanaler, konstruksjon"],
+   bim:"Full tverrfaglig, koordinert",tag:"Egenskaper på tag: type, kapasitet, fabrikat",tegn:"P&ID + detaljer som ikke fungerer i 3D",
+   tools:"BIM-forfatterverktøy · CDE · QA/clash-verktøy · 3D-viewer / felt-app · BCF",
+   users:"Alle fag, BIM-koordinator",
+   thread:"Modellen er primærleveransen. Tegninger produseres kun der nødvendig. Alle tag-er har nå egenskaper (type, fabrikat, kapasitet). Datablad-PDF-er kobles til tag via CDE og er tilgjengelige direkte på objektet i 3D-vieweren."},
+  {name:"Anskaffelse",lod:"MMI 375",color:"#9B9632",mmi:"#9B9632",badges:["375"],
+   sub:"Innkjøp av utstyr og tjenester",
+   acts:["Tilbudsforespørsler basert på modell + mengder","Utstyrsspesifikasjoner fra tag-register","Leverandørdata inn i modellen (as-ordered)","Kontraktsunderlag"],
+   model:["Bestillingsspesifikke data oppdatert","Leverandør-datablad erstatter generiske","Tag-register: fabrikat, modell, serienummer"],
+   bim:"Bestillingsspesifikk",tag:"Leverandør-datablad",tegn:"—",
+   tools:"CDE (dokumentstyring) · Tag-register · 3D-viewer (leverandørtilgang)",
+   users:"Innkjøp, leverandører",
+   thread:"Leverandørene får tilgang til modellen via gratis 3D-viewer. De leverer datablad-PDF-er som erstatter generiske datablad i CDE. Tag-registeret oppdateres med faktisk fabrikat og serienummer. Ingen nye tegninger."},
+  {name:"Bygging",lod:"MMI 400 → 450",color:"#378246",mmi:"#378246",badges:["400","425","450"],
+   sub:"Montasje, oppfølging, avvikshåndtering",
+   acts:["Montasje etter modell (ikke tegning)","Avvikshåndtering og snagging","SHA-oppfølging og sjekklister","Fremdriftsrapportering mot modell","As-built oppdatering løpende"],
+   model:["Montasjerekkefølge synlig i modell","Avvik merket med BCF-issues","As-built geometri oppdatert løpende"],
+   bim:"As-built løpende",tag:"Verifisert mot montert utstyr",tegn:"Montasjedetaljer ved behov",
+   tools:"Felt-app (sjekklister, avvik) · CDE · 3D-viewer (felt, nettbrett) · QA-verktøy",
+   users:"Entreprenør, byggeleder",
+   thread:"Byggeplassen jobber fra modellen på nettbrett/telefon. Tegninger brukes kun for P&ID og spesialdetaljer. Entreprenør registrerer avvik direkte i modellen (BCF). Datablad og tag-info er tilgjengelig på objektet i felt. As-built bygges løpende."},
+  {name:"Ferdigstillelse",lod:"MMI 475",color:"#64C37D",mmi:"#9BD7A5",badges:["475"],
+   sub:"Testing, idriftsetting, verifikasjon",
+   acts:["Systemtest og funksjonstest","Punch list / restsaker","Verifikasjon tag-register mot montert","Sluttkontroll modell mot as-built","FDV-dokumentasjon komplettering"],
+   model:["As-built verifisert","Alle tag-er har komplett datasett","Datablad og sertifikater koblet"],
+   bim:"As-built verifisert",tag:"Komplett: datablad + sertifikat + driftsinstruks",tegn:"—",
+   tools:"Felt-app (punch) · Overleveringsverktøy · CDE (sluttdokumentasjon)",
+   users:"Systemansvarlige, byggeleder",
+   thread:"Overleveringsverktøyet strukturerer overgangen: hvert tag-objekt i modellen har komplett dokumentasjon koblet i PDF. Punch-list kjøres i felt-app. Modellen fryses som as-built MMI 475."},
+  {name:"Overlevering",lod:"MMI 500 ✓",color:"#1E46AF",mmi:"#1E46AF",badges:["500"],
+   sub:"Modell og dokumentasjon til eier/drift",
+   acts:["Formell overlevering av as-built-modell","FDV-dokumentasjon komplett i struktur","Tag-register overlevert som database","Opplæring av driftspersonell","Garantiperiode starter"],
+   model:["IFC-modell (åpent, leverandøruavhengig)","Tag-register med komplett datasett","Driftsinstrukser per system"],
+   bim:"Levert som IFC (åpent format)",tag:"Overlevert som database",tegn:"P&ID + kritiske detaljer",
+   tools:"Overleveringsverktøy · Åpent format (IFC) · FDV-system (mottak)",
+   users:"Eier, driftsleder",
+   thread:"Modellen leveres som IFC — åpent format som sikrer langsiktig tilgang uavhengig av programvare. Tag-registeret med alle datablad følger modellen. Driftspersonellet navigerer med enkel 2D/3D-visning."},
+  {name:"Drift / FDV",lod:"MMI 600",color:"#9B00CD",mmi:"#9B00CD",badges:["600"],
+   sub:"Vedlikehold, utskiftning, dokumentasjon",
+   acts:["Planlagt vedlikehold basert på tag-data","Tilstandsvurdering mot modell","Reservedelshåndtering via tag","Hendelseslogg per utstyrsenhet","Modell oppdateres ved utskiftning"],
+   model:["As-built som navigasjonsverktøy","Klikk → datablad, historikk, vedlikehold","Modellen lever i 20–50 år"],
+   bim:"Navigasjon i drift",tag:"Klikk på objekt → datablad, historikk",tegn:"Vedlikeholdes ved endring",
+   tools:"FDV-system · Åpen IFC-modell · Vedlikeholdssystem (CMMS)",
+   users:"Driftspersonell",
+   thread:"Driftspersonellet bruker FDV-systemet daglig: de navigerer i en enkel 3D/2D-visning, klikker på et utstyr og får opp datablad, vedlikeholdshistorikk og neste planlagte service. Ingen BIM-kompetanse nødvendig. Formatet er IFC — ingen leverandørlås."}
+];
+
+let cur = 0;
+const tabs = document.getElementById('phaseTabs');
+const bar = document.getElementById('progressBar');
+const cards = document.getElementById('phaseCards');
+
+phases.forEach((ph, i) => {
+  // Tab
+  const btn = document.createElement('button');
+  btn.className = 'phase-tab';
+  btn.innerHTML = `${ph.name}<span class="mmi">${ph.lod}</span>`;
+  btn.onclick = () => show(i);
+  tabs.appendChild(btn);
+
+  // Progress segment
+  const seg = document.createElement('div');
+  seg.className = 'progress-seg';
+  bar.appendChild(seg);
+
+  // Card
+  const card = document.createElement('div');
+  card.className = 'phase-detail';
+  const empty = (v) => v === '—';
+  card.innerHTML = `
+    <div class="phase-header">
+      <div class="phase-num" style="background:${ph.color}">${i + 1}</div>
+      <div><h3>${ph.name}</h3><p>${ph.sub}</p></div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-box">
+        <h4>Aktiviteter</h4>
+        <ul>${ph.acts.map(a => `<li>${a}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-box">
+        <h4>Modell (${ph.lod})</h4>
+        <ul>${ph.model.map(m => `<li>${m}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="thread-badges">
+      <div class="badge model"><div class="badge-label">BIM-modell · MMI</div><div class="badge-val">${ph.bim}</div></div>
+      <div class="badge tag"><div class="badge-label">Tag + datablad</div><div class="badge-val">${ph.tag}</div></div>
+      <div class="badge tegn"><div class="badge-label">Tegninger</div><div class="badge-val ${empty(ph.tegn) ? 'empty' : ''}">${ph.tegn}</div></div>
+    </div>
+    <div class="meta-row">
+      <div class="meta-box"><h5>Verktøykategorier</h5><p>${ph.tools}</p></div>
+      <div class="meta-box"><h5>Brukere</h5><p>${ph.users}</p></div>
+    </div>
+    <div class="datathread-narrative">
+      <h4>Datatråd</h4>
+      <p>${ph.thread}</p>
+    </div>
+    <div class="phase-nav-btns">
+      <button class="nav-btn" onclick="go(-1)" ${i === 0 ? 'disabled' : ''}>← Forrige</button>
+      <button class="nav-btn" onclick="go(1)" ${i === phases.length - 1 ? 'disabled' : ''}>Neste →</button>
+    </div>
+  `;
+  cards.appendChild(card);
+});
+
+function show(i) {
+  cur = i;
+  document.querySelectorAll('.phase-tab').forEach((t, j) => t.classList.toggle('active', j === i));
+  document.querySelectorAll('.progress-seg').forEach((s, j) => s.classList.toggle('done', j <= i));
+  document.querySelectorAll('.phase-detail').forEach((c, j) => c.classList.toggle('active', j === i));
+}
+function go(d) { show(cur + d); }
+show(0);
+</script>
+</body>
+</html>
