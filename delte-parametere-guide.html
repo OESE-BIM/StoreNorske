@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delte parametere på tvers av fag — startguide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1A2B;
+    --ink-soft:#1C2C40;
+    --paper:#F5F7FA;
+    --surface:#FFFFFF;
+    --muted:#5B6B7F;
+    --line:#DCE3EC;
+    --line-strong:#C4D0DE;
+    --accent:#1D5FD6;
+    --accent-deep:#143C8C;
+    --accent-wash:#EAF1FE;
+    --signal:#E0A500;
+    --signal-deep:#9A6F00;
+    --signal-wash:#FBF3DC;
+    --code-bg:#0E1A2B;
+    --radius:14px;
+    --radius-sm:9px;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    font-size:16.5px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--line-strong);transition:border-color .15s,color .15s;}
+  a:hover{color:var(--accent-deep);border-bottom-color:var(--accent);}
+  a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:3px;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:
+      radial-gradient(120% 130% at 82% -10%, #20436F 0%, rgba(32,67,111,0) 55%),
+      linear-gradient(160deg,#0E1A2B 0%,#13243A 100%);
+    color:#EAF1FA;
+    padding:54px 24px 60px;
+    position:relative;
+    overflow:hidden;
+    border-bottom:1px solid #0a131f;
+  }
+  .hero::before{
+    /* faint coordinate grid, like CAD paperspace */
+    content:"";
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+    background-size:34px 34px;
+    mask-image:radial-gradient(120% 100% at 30% 0%,#000 40%,transparent 85%);
+    pointer-events:none;
+  }
+  .hero-inner{max-width:980px;margin:0 auto;position:relative;}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:#7FB0F2;margin:0 0 18px;font-weight:500;
+  }
+  .hero h1{
+    font-family:"Space Grotesk",sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,5.4vw,50px);
+    line-height:1.04;
+    letter-spacing:-.015em;
+    margin:0 0 16px;
+    color:#fff;
+    max-width:16ch;
+  }
+  .hero-sub{
+    font-size:clamp(16px,2.1vw,19px);
+    color:#B9CCE4;
+    max-width:50ch;
+    margin:0 0 6px;
+    line-height:1.5;
+  }
+  .hero-diagram{margin-top:34px;}
+  .hero-diagram svg{width:100%;height:auto;max-width:940px;display:block;}
+
+  /* ---------- MEMO STRIP ---------- */
+  .memo{
+    max-width:880px;margin:-26px auto 0;position:relative;z-index:2;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 18px 40px -28px rgba(14,26,43,.55);
+    padding:20px 26px;
+    display:grid;grid-template-columns:auto 1fr;gap:6px 22px;
+    font-size:15px;
+  }
+  .memo dt{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);padding-top:3px;font-weight:500;white-space:nowrap;
+  }
+  .memo dd{margin:0;color:var(--ink);font-weight:500;}
+  .memo .tools{display:flex;flex-wrap:wrap;gap:6px;}
+  .memo .tools span{
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:6px;padding:1px 8px;color:var(--ink-soft);
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px;}
+  section.block{padding:46px 0;border-top:1px solid var(--line);}
+  section.block:first-of-type{border-top:none;}
+
+  .kicker{display:flex;align-items:baseline;gap:16px;margin:0 0 8px;}
+  .kicker .num{
+    font-family:"Space Grotesk",sans-serif;font-weight:700;
+    font-size:30px;color:var(--accent);line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .kicker .lab{
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+    transform:translateY(-2px);
+  }
+  h2{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;
+    font-size:clamp(22px,3.4vw,28px);line-height:1.18;
+    letter-spacing:-.01em;margin:0 0 18px;color:var(--ink);
+  }
+  h3{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;
+    font-size:18px;margin:30px 0 8px;color:var(--ink);
+    letter-spacing:-.005em;
+  }
+  p{margin:0 0 16px;}
+  .lead{font-size:18px;color:var(--ink-soft);}
+  strong{font-weight:600;color:var(--ink);}
+  ul,ol{margin:0 0 16px;padding-left:1.25em;}
+  li{margin:0 0 7px;}
+  li::marker{color:var(--accent);}
+
+  /* inline mono tag (property / file names) */
+  .tag{
+    font-family:"IBM Plex Mono",monospace;font-size:.86em;
+    background:var(--accent-wash);color:var(--accent-deep);
+    border:1px solid #D2E0FB;border-radius:5px;
+    padding:.5px 6px;white-space:nowrap;
+  }
+
+  /* ---------- CALLOUTS ---------- */
+  .callout{
+    border-radius:var(--radius);padding:18px 20px 18px 22px;
+    margin:24px 0;position:relative;font-size:15.5px;line-height:1.55;
+  }
+  .callout p:last-child{margin-bottom:0;}
+  .callout .ctag{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;font-weight:600;display:block;margin-bottom:6px;
+  }
+  .crux{background:var(--signal-wash);border:1px solid #EBD79A;border-left:4px solid var(--signal);}
+  .crux .ctag{color:var(--signal-deep);}
+  .note{background:var(--accent-wash);border:1px solid #D2E0FB;border-left:4px solid var(--accent);}
+  .note .ctag{color:var(--accent-deep);}
+
+  /* ---------- TOOL LIST (section 1) ---------- */
+  .tools-list{
+    list-style:none;padding:0;margin:20px 0;
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    background:var(--surface);
+  }
+  .tools-list li{
+    margin:0;padding:13px 18px;display:grid;
+    grid-template-columns:128px 1fr;gap:14px;align-items:baseline;
+    border-top:1px solid var(--line);font-size:15px;
+  }
+  .tools-list li:first-child{border-top:none;}
+  .tools-list .t{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;color:var(--ink);
+    font-size:15px;
+  }
+
+  /* ---------- STEPS (section 3) ---------- */
+  .step{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);padding:20px 22px 6px;margin:16px 0;
+    position:relative;
+  }
+  .step-head{display:flex;align-items:center;gap:12px;margin-bottom:2px;}
+  .step-no{
+    flex:none;width:30px;height:30px;border-radius:8px;
+    background:var(--ink);color:#fff;font-family:"Space Grotesk",sans-serif;
+    font-weight:700;font-size:15px;display:grid;place-items:center;
+  }
+  .step-head h3{margin:0;font-size:17.5px;}
+  .step p{font-size:15px;}
+  .step ul{font-size:15px;}
+
+  /* ---------- TABLE (section 4) ---------- */
+  .table-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:var(--radius);}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px;background:var(--surface);}
+  thead th{
+    background:var(--ink);color:#EAF1FA;text-align:left;
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:500;padding:12px 16px;
+  }
+  tbody td{padding:13px 16px;border-top:1px solid var(--line);vertical-align:top;line-height:1.45;}
+  tbody tr:nth-child(even){background:#FAFCFE;}
+  tbody td:first-child{font-family:"Space Grotesk",sans-serif;font-weight:600;color:var(--ink);white-space:nowrap;}
+  td .tag{font-size:.82em;}
+
+  /* ---------- CANDIDATES (Plant View) ---------- */
+  .cand{display:grid;gap:12px;margin:18px 0;}
+  .cand .item{
+    background:var(--surface);border:1px solid var(--line);
+    border-left:3px solid var(--accent);border-radius:var(--radius-sm);
+    padding:14px 18px;font-size:15px;
+  }
+  .cand .item.viewer{border-left-color:var(--muted);}
+  .cand .item h4{
+    margin:0 0 4px;font-family:"Space Grotesk",sans-serif;font-size:15.5px;font-weight:600;
+  }
+  .cand .item p{margin:0;font-size:14.5px;color:var(--ink-soft);}
+
+  /* ---------- REFERENCES (section 5) ---------- */
+  .refs{margin-top:8px;}
+  .ref-group{margin:18px 0;}
+  .ref-group h4{
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 9px;font-weight:600;
+    padding-bottom:6px;border-bottom:1px solid var(--line);
+  }
+  .ref-group ul{list-style:none;padding:0;margin:0;}
+  .ref-group li{
+    margin:0 0 9px;padding-left:18px;position:relative;font-size:14.5px;line-height:1.45;
+  }
+  .ref-group li::before{
+    content:"↳";position:absolute;left:0;color:var(--accent);font-size:13px;top:1px;
+  }
+  .ref-group .lng{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);
+    border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:4px;
+    white-space:nowrap;
+  }
+
+  /* ---------- CLOSING ---------- */
+  .closing{
+    background:linear-gradient(160deg,#0E1A2B 0%,#16283F 100%);
+    color:#EAF1FA;border-radius:var(--radius);padding:30px 30px;margin:36px 0 8px;
+    position:relative;overflow:hidden;
+  }
+  .closing h2{color:#fff;margin-bottom:12px;}
+  .closing p{color:#C3D4EA;}
+  .closing p:last-child{margin-bottom:0;}
+  .sign{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;color:#fff;
+    margin-top:18px;font-size:15px;
+  }
+
+  footer{
+    max-width:820px;margin:0 auto;padding:26px 24px 56px;
+    color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+  }
+  footer .print-tip{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft);
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;
+    padding:10px 14px;margin-bottom:14px;display:inline-block;
+  }
+
+  /* ---------- MOTION ---------- */
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .hero h1,.hero-sub,.eyebrow,.hero-diagram{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;}
+  .hero-sub{animation-delay:.08s;}
+  .hero-diagram{animation-delay:.16s;}
+  .draw{stroke-dasharray:240;stroke-dashoffset:240;animation:drawline 1.1s ease forwards .4s;}
+  @keyframes drawline{to{stroke-dashoffset:0;}}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;}
+    .draw{stroke-dashoffset:0;}
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:620px){
+    body{font-size:16px;}
+    .memo{grid-template-columns:1fr;gap:3px 0;}
+    .memo dt{padding-top:10px;}
+    .memo dt:first-child{padding-top:0;}
+    .tools-list li{grid-template-columns:1fr;gap:2px;}
+    .tools-list .t{font-size:14.5px;}
+    .kicker .num{font-size:25px;}
+  }
+
+  /* ---------- PRINT (Lagre som PDF for Teams) ---------- */
+  @media print{
+    @page{margin:16mm 14mm;}
+    body{background:#fff;font-size:11pt;line-height:1.5;}
+    .hero{background:#0E1A2B!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:30px 20px 34px;}
+    .hero::before{display:none;}
+    .memo{box-shadow:none;margin-top:-18px;}
+    a{color:var(--ink);border-bottom:none;}
+    section.block{padding:22px 0;page-break-inside:avoid;}
+    .step,.callout,.table-wrap,.cand .item,.closing{page-break-inside:avoid;}
+    .closing{background:#0E1A2B!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    thead th{background:#0E1A2B!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    footer .print-tip{display:none;}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Startguide · BIM-koordinering</p>
+    <h1>Delte parametere på tvers av fag</h1>
+    <p class="hero-sub">Fra null til fungerende oppsett — i Revit, og slik det møter de andre fagene i IFC.</p>
+
+    <div class="hero-diagram" aria-label="Diagram: fem fagverktøy eksporterer til IFC Property Sets, som kontrolleres samlet i Solibri">
+      <svg viewBox="0 0 940 300" xmlns="http://www.w3.org/2000/svg" role="img">
+        <defs>
+          <linearGradient id="hub" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F0BE3A"/>
+            <stop offset="1" stop-color="#E0A500"/>
+          </linearGradient>
+          <style>
+            .nlabel{font-family:'IBM Plex Mono',monospace;font-size:14px;fill:#DCE9F8;}
+            .nbox{fill:rgba(255,255,255,.04);stroke:#3C5879;stroke-width:1.2;}
+            .nbox.r{stroke:#5C8AC2;}
+            .hublabel{font-family:'Space Grotesk',sans-serif;font-weight:700;}
+            .sublabel{font-family:'IBM Plex Mono',monospace;font-size:11px;fill:#9DB6D6;}
+          </style>
+        </defs>
+
+        <!-- connecting lines: sources -> hub -->
+        <g fill="none" stroke="#5C8AC2" stroke-width="1.6" opacity="0.75">
+          <path class="draw" d="M196,46 C320,46 360,150 470,150"/>
+          <path class="draw" d="M196,98 C320,98 380,150 470,150"/>
+          <path class="draw" d="M196,150 C320,150 400,150 470,150"/>
+          <path class="draw" d="M196,202 C320,202 380,150 470,150"/>
+          <path class="draw" d="M196,254 C320,254 360,150 470,150"/>
+        </g>
+        <!-- hub -> solibri -->
+        <path class="draw" d="M610,150 C680,150 700,150 760,150" fill="none" stroke="#E0A500" stroke-width="2"/>
+        <polygon points="760,144 772,150 760,156" fill="#E0A500"/>
+
+        <!-- source nodes -->
+        <g class="nlabel">
+          <rect class="nbox" x="40" y="30" width="156" height="32" rx="8"/><text x="58" y="51">Revit</text>
+          <rect class="nbox" x="40" y="82" width="156" height="32" rx="8"/><text x="58" y="103">Tekla</text>
+          <rect class="nbox" x="40" y="134" width="156" height="32" rx="8"/><text x="58" y="155">AutoCAD 3D</text>
+          <rect class="nbox" x="40" y="186" width="156" height="32" rx="8"/><text x="58" y="207">Plant View</text>
+          <rect class="nbox" x="40" y="238" width="156" height="32" rx="8"/><text x="58" y="259">Novapoint</text>
+        </g>
+
+        <!-- IFC hub -->
+        <rect x="470" y="116" width="140" height="68" rx="14" fill="url(#hub)"/>
+        <text x="540" y="150" text-anchor="middle" class="hublabel" font-size="26" fill="#1A1205">IFC</text>
+        <text x="540" y="170" text-anchor="middle" class="sublabel" fill="#5A4408">Property Sets</text>
+
+        <!-- Solibri node -->
+        <rect class="nbox r" x="772" y="124" width="128" height="52" rx="10"/>
+        <text x="836" y="148" text-anchor="middle" class="nlabel" style="fill:#EAF1FA">Solibri</text>
+        <text x="836" y="166" text-anchor="middle" class="sublabel">kontroll</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<dl class="memo">
+  <dt>Til</dt><dd>Ørjan</dd>
+  <dt>Tema</dt><dd>Oppsett av «Shared parameters» i prosjektet</dd>
+  <dt>Verktøy</dt>
+  <dd class="tools">
+    <span>Revit</span><span>Tekla</span><span>AutoCAD 3D</span><span>Plant View</span><span>Novapoint</span>
+  </dd>
+</dl>
+
+<main class="wrap">
+
+  <!-- INTRO -->
+  <section class="block">
+    <p class="lead">Hei Ørjan! Du har sagt at du vil lære deg å sette opp delte parametere selv, i stedet for å bestille det. Det er en veldig god idé — og den viktigste innsikten er faktisk enklere enn folk tror. Denne guiden tar deg fra null til et fungerende oppsett, og forklarer både <em>hva</em> du gjør i Revit og <em>hvorfor</em> det henger sammen med de andre fagene.</p>
+  </section>
+
+  <!-- 1 -->
+  <section class="block">
+    <div class="kicker"><span class="num">1</span><span class="lab">Innsikten først</span></div>
+    <h2>Den viktigste innsikten først</h2>
+
+    <p>«Shared Parameters» (delte parametere) er egentlig et <strong>Revit-begrep</strong>. I prosjekter som er ledet av Revit-miljøet, er delte parametere den ene mekanismen alle forholder seg til — og derfor har det vært nok å «bestille» det. Alle snakker samme språk.</p>
+
+    <p>Men her er greia: <strong>de andre fagene bruker ikke Revit, og det finnes ikke ett felles «delte parametere»-system på tvers av verktøyene.</strong> Hvert verktøy bærer egne data på sin egen måte:</p>
+
+    <ul class="tools-list">
+      <li><span class="t">Revit</span><span>Shared Parameters (lagret i en delt parameterfil <span class="tag">.txt</span>, hver parameter har en unik GUID)</span></li>
+      <li><span class="t">Tekla Structures</span><span>User-Defined Attributes (UDA-er) + template-attributter</span></li>
+      <li><span class="t">AutoCAD</span><span>Object Data / blokk-attributter / XDATA — i Plant 3D: egenskaper styrt av komponent-spec</span></li>
+      <li><span class="t">Novapoint (Quadri)</span><span>Egne objekt-attributter / «generic properties»</span></li>
+      <li><span class="t">Plant View</span><span>Eget attributtsystem (se punkt 4 — navnet er litt tvetydig)</span></li>
+    </ul>
+
+    <p>Så hva er det som <strong>binder alt sammen?</strong> Det er <strong>utvekslingsformatet</strong>, og i praksis er det nesten alltid <strong>IFC</strong> — nærmere bestemt <strong>Property Sets (Psets)</strong> inne i IFC-modellen.</p>
+
+    <p>Det betyr at «delte parametere» for et tverrfaglig prosjekt egentlig er en <strong>avtalt egenskaps-spesifikasjon</strong>: en omforent liste over hvilke egenskaper hvert objekt skal bære, hva de heter, hvilken datatype de har, og hvilket IFC-property set de havner i. Målet er at når hvert fag eksporterer IFC, lander «samme logiske egenskap» (f.eks. brannklasse, status/fase, en systemkode) på <strong>samme forutsigbare sted</strong> — slik at det kan kontrolleres på tvers av alle modellene, typisk i Solibri.</p>
+
+    <div class="callout crux">
+      <span class="ctag">Kort sagt</span>
+      <p>Inne i Revit setter du opp delte parametere. På tvers av fag handler det egentlig om å bli enige om <strong>hvilke egenskaper som skal ligge hvor i IFC</strong>. Det er den delen som faktisk er verdt å lære.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="block">
+    <div class="kicker"><span class="num">2</span><span class="lab">Steg null</span></div>
+    <h2>Steg null (det viktigste steget): finnes spesifikasjonen allerede?</h2>
+
+    <p>Før du rører Revit: <strong>finn ut om prosjektet allerede har en egenskaps-/leveransespesifikasjon eller en BIM-manual.</strong> Veldig ofte kommer dette fra byggherren. I Norge for eksempel:</p>
+
+    <ul>
+      <li><strong>Statsbygg</strong> har <span class="tag">SIMBA</span> (Statsbyggs BIM-krav). Gjeldende versjon er <strong>SIMBA 2.1</strong>, som gjelder i nye prosjekter fra 1. juli 2022. Det er et <strong>krav</strong> at prosjekter bruker maskinvalidering av IFC-modeller mot det maskinlesbare kravsettet — kravdatabasen ligger på <span class="tag">statsbygg.bim-q.com</span>.</li>
+      <li><strong>Bane NOR</strong> har dokumentet «Krav til BIM — Generelle krav» (<span class="tag">GEN-00-A-00005</span>) og informasjonsstandarden <span class="tag">KIM</span> (Krav til informasjonsmodellering), som videreføres som «KIM 2.0».</li>
+      <li><strong>Nye Veier</strong> og andre store byggherrer har tilsvarende.</li>
+    </ul>
+
+    <p>Et nyttig poeng: både Statsbygg og Bane NOR bruker den samme kravdatabasen <strong>BIMQ</strong>. Det betyr at kravene uttrykkes strukturert per objektklasse, fase og ansvarlig fag — akkurat den typen «fasit» du vil avlede Revit-oppsettet ditt fra.</p>
+
+    <p>I tillegg finnes nasjonale standarder: <span class="tag">NS 3451</span> (bygningsdelstabell) og <span class="tag">NS 8360</span>-serien (BIM-objekter for byggverk) — gjeldende del 1 er <strong>NS 8360-1:2023</strong> «Modellpraksis, navngivning, typekoding og egenskaper». Over det hele ligger det internasjonale <strong>buildingSMART / IFC</strong>-rammeverket.</p>
+
+    <h3>To utfall</h3>
+    <ul>
+      <li><strong>Spesifikasjonen finnes</strong> → da skal Revit-oppsettet ditt <strong>avledes fra den</strong>. Du bygger ikke noe fritt; du speiler kravene.</li>
+      <li><strong>Spesifikasjonen finnes ikke</strong> → da må den faktisk etableres først, og forankres hos alle fagene. Dette er mer BIM-koordinering enn knappetrykk — og det er her den virkelige jobben (og læringen) ligger.</li>
+    </ul>
+
+    <div class="callout note">
+      <span class="ctag">Ferskt verktøy å kjenne til</span>
+      <p>Den nyeste måten å uttrykke slike krav maskinlesbart på heter <strong>IDS (Information Delivery Specification)</strong> fra buildingSMART. En liten fil kan f.eks. si «alle vegger skal ha en brannklasse-egenskap», og brukes til å sjekke modellene automatisk. <span class="tag">IDS 1.0</span> ble endelig standard i juni 2024 — ferskt, men i ferd med å bli bransjestandard.</p>
+    </div>
+
+    <div class="callout crux">
+      <span class="ctag">Det mest verdifulle du gjør tidlig</span>
+      <p>Finn ut om en egenskaps-spesifikasjon eller BIM-gjennomføringsplan (BEP) finnes, og legg deg på den. Ellers risikerer du å bygge et fint Revit-oppsett som ikke snakker med de andre fagene.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="block">
+    <div class="kicker"><span class="num">3</span><span class="lab">Revit-oppsettet</span></div>
+    <h2>Selve Revit-oppsettet, steg for steg</h2>
+    <p>Når du vet hvilke egenskaper som kreves, gjør du dette i Revit:</p>
+
+    <div class="step">
+      <div class="step-head"><span class="step-no">1</span><h3>Lag eller skaff den delte parameterfilen (.txt)</h3></div>
+      <p>Gå til <strong>Manage → Shared Parameters</strong>. Her oppretter du en ny fil eller blar deg fram til en eksisterende. Filen lagrer definisjonen av hver parameter, organisert i <strong>grupper</strong>, og hver parameter får en <strong>unik GUID</strong> (en slags «fødselsattest»).</p>
+      <ul>
+        <li>Legg filen på et <strong>delt område (server)</strong>, ikke lokalt.</li>
+        <li><strong>Unngå at folk har hver sin kopi.</strong> GUID-en er det som gjør at en parameter er «den samme» på tvers av filer og prosjekter. To parametere med samme navn, men ulik GUID, er <em>ikke</em> den samme parameteren.</li>
+        <li>En Revit-økt kan bare referere til <strong>én</strong> delt parameterfil om gangen.</li>
+        <li>Tips: fra Revit 2023 finnes også <strong>Autodesk Parameter Service</strong> (via Autodesk Docs/ACC) for å dele parametere sentralt. Tekstfilen er fortsatt enklest å starte med.</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-no">2</span><h3>Ta dem i bruk</h3></div>
+      <p>Du har to hovedveier:</p>
+      <ul>
+        <li><strong>Prosjektparametere:</strong> Manage → Project Parameters → Add → velg <strong>Shared Parameter</strong>. Bind dem til kategorier (vegger, dører osv.) og velg instans/type.</li>
+        <li><strong>Familieparametere:</strong> last parameteren inn i familier slik at den «reiser med objektet».</li>
+      </ul>
+      <p><strong>Viktig:</strong> Bare <strong>delte</strong> parametere (ikke vanlige prosjektparametere) kan brukes i <strong>tags</strong>, eksporteres til IFC med stabil identitet, og brukes i <strong>schedules på tvers av kategorier/prosjekter</strong>. Skal en egenskap kunne tagges, planlegges eller eksporteres pålitelig — bruk en delt parameter.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-no">3</span><h3>Bestem bevisst instans vs. type — og hvilke kategorier</h3></div>
+      <p>For hver parameter, ta en bevisst beslutning:</p>
+      <ul>
+        <li><strong>Instans</strong> (verdien varierer per objekt, f.eks. en posisjons-ID) eller <strong>type</strong> (verdien er lik for alle av samme type, f.eks. brannklasse på en dørtype).</li>
+        <li>Hvilke <strong>kategorier</strong> parameteren skal bindes til.</li>
+      </ul>
+      <p>Tommelfingerregel: bruk <strong>type</strong> for egenskaper som deles av mange like objekter, og <strong>instans</strong> bare når objektene faktisk varierer.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-no">4</span><h3>Styr hvilket Pset egenskapen havner i ved IFC-eksport</h3></div>
+      <p>Dette er broen til de andre fagene. I IFC-eksportoppsettet (<strong>File → Export → IFC → Modify Setup → Property Sets</strong>):</p>
+      <ul>
+        <li>Revit kan mappe automatisk når navnet matcher en standard-egenskap (f.eks. <span class="tag">Pset_WallCommon.FireRating</span>).</li>
+        <li>Eller du styrer det eksplisitt med en <strong>«user-defined property sets»-mappingfil</strong> — en tekstfil der du angir property set-navn, instans/type, IFC-klasse, og deretter linjer som mapper <span class="tag">[IFC-egenskap] [datatype] [Revit-parameter]</span> (tab-separert). Hak av for <strong>«Export user-defined property sets»</strong> og pek på filen.</li>
+      </ul>
+      <p>Autodesk leverer en mal: <span class="tag">DefaultUserDefinedParameterSets.txt</span>. Lag en <strong>kopi</strong> og jobb i kopien.</p>
+      <p>Nyttig norsk navnekonvensjon (fra NS 8360-veiledningen): <span class="tag">Pset_</span> = oppfylt egenskap på BIM-objektet, <span class="tag">Req_</span> = kravet til egenskapen. F.eks. <span class="tag">Pset_WallCommon.Firerating</span> vs. <span class="tag">Req_WallCommon.FireratingReq</span>. Greit å kjenne til hvis byggherren bruker det.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-head"><span class="step-no">5</span><h3>Test rundturen</h3></div>
+      <p>Ikke stol på at det virker — <strong>sjekk det</strong>:</p>
+      <ol>
+        <li>Eksporter IFC.</li>
+        <li>Åpne i <strong>Solibri</strong> (eller en gratis IFC-viewer som Solibri Anywhere / Trimble Connect).</li>
+        <li>Bekreft at egenskapene faktisk ligger der de skal — riktig property set, riktig verdi og enhet.</li>
+      </ol>
+      <p>Dette er eneste måten å vite at oppsettet ditt «snakker» med de andre fagene. Vanlig snublepunkt: <strong>enheter</strong> — sjekk at f.eks. millimeter forblir millimeter i IFC-en.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="block">
+    <div class="kicker"><span class="num">4</span><span class="lab">På tvers</span></div>
+    <h2>Hvordan de andre fagene bærer tilsvarende data — og hvor det møtes</h2>
+    <p>Du trenger ikke være ekspert i de andre verktøyene, men det hjelper å vite at de gjør «det samme» på sin måte, og at alt møtes i IFC:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Fag / verktøy</th><th>Hvordan egendata bæres</th><th>Til IFC</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Revit <em>(ditt)</em></td>
+            <td>Shared Parameters (GUID, <span class="tag">.txt</span>-fil)</td>
+            <td>Psets via auto-mapping eller user-defined mappingfil</td>
+          </tr>
+          <tr>
+            <td>Tekla Structures</td>
+            <td>User-Defined Attributes (UDA-er) + template-attributter</td>
+            <td>Egne property set–konfigurasjonsfiler (XML, <span class="tag">IfcPropertySetConfigurations.xml</span>)</td>
+          </tr>
+          <tr>
+            <td>AutoCAD</td>
+            <td>Object Data / blokk-attributter / XDATA; i Plant 3D: komponent-spec-egenskaper</td>
+            <td>Via Civil 3D / Map 3D property sets eller tredjeparts IFC-eksportør (Plant 3D har ikke innebygd IFC-eksport)</td>
+          </tr>
+          <tr>
+            <td>Novapoint (Quadri)</td>
+            <td>Objekt-attributter / «generic properties»</td>
+            <td>Via «conversion rules»; bruk tegnet <span class="tag">|</span> i navnet for å definere property set</td>
+          </tr>
+          <tr>
+            <td>Plant View</td>
+            <td>Eget attributtsystem (se under)</td>
+            <td>IFC-eksport (se under)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Om «Plant View» — en ærlig avklaring</h3>
+    <p>Dette navnet er <strong>tvetydig</strong>. Jeg fant ikke ett produkt merket nøyaktig «Plant View» som både bærer egne attributter og eksporterer IFC. I en nordisk anleggs-/industrikontekst, sammen med Tekla/Revit/AutoCAD/Novapoint, peker det mest sannsynlig mot et <strong>prosessanleggs-/3D-designverktøy</strong>. De to mest sannsynlige kandidatene:</p>
+
+    <div class="cand">
+      <div class="item">
+        <h4>AVEVA E3D / PDMS</h4>
+        <p>Det globale standardverktøyet for prosessanlegg (rør, utstyr, stål). Attributtmekanismen heter <strong>UDA-er</strong>, og IFC-eksport er innebygd (standard IFC2x3, IFC4 valgbar). Dokumentert Tekla ↔ AVEVA-kobling finnes.</p>
+      </div>
+      <div class="item">
+        <h4>CADMATIC (Plant Modeller / eShare)</h4>
+        <p>Finsk/nordisk anleggs- og marin-designverktøy, svært utbredt i Norden. Mekanismen heter rett og slett <strong>attributter</strong>, og Plant Modeller eksporterer IFC (Model → Export → IFC, valgbart skjema).</p>
+      </div>
+      <div class="item viewer">
+        <h4>CAXperts UniversalPlantViewer <em>— navnemessig nær, men en viewer</em></h4>
+        <p>Leser modeller og attributter, men lager ikke UDA-er og eksporterer ikke IFC. Bare relevant hvis «Plant View» i prosjektet er <em>visnings-/koordineringslaget</em>, ikke en design-kilde.</p>
+      </div>
+    </div>
+
+    <div class="callout note">
+      <span class="ctag">Anbefaling</span>
+      <p>Bekreft med fagansvarlig hva «Plant View» faktisk er i <strong>dette</strong> prosjektet — et design-verktøy (sannsynligvis AVEVA E3D eller CADMATIC) eller en modell-viewer. Da vet vi nøyaktig hvordan det bærer data og eksporterer IFC.</p>
+    </div>
+
+    <p><strong>Poenget uansett:</strong> alle fagene må legge «samme logiske egenskap» på et avtalt sted i IFC. Det er derfor steg null (spesifikasjonen) er så viktig — den er «kontrakten» som alle verktøyoppsettene avledes fra.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="block">
+    <div class="kicker"><span class="num">5</span><span class="lab">Lære mer</span></div>
+    <h2>Lære mer / hvem du kan spørre</h2>
+    <ul>
+      <li><strong>Revit-delen</strong> er godt dokumentert — Autodesk Help og mange gode gjennomganger på nett.</li>
+      <li><strong>Den tverrfaglige IFC-/egenskapsdelen</strong> er mer standardiseringsarbeid — <strong>buildingSMART Norge</strong> har godt materiale, og rett intern person er som regel <strong>BIM-/VDC-koordinatoren</strong> eller den som eier byggherrens BIM-krav.</li>
+      <li><strong>Det mest verdifulle:</strong> finn ut om en egenskaps-spesifikasjon eller BEP finnes i prosjektet, og legg deg på den.</li>
+    </ul>
+
+    <div class="refs">
+      <div class="ref-group">
+        <h4>Revit — delte parametere</h4>
+        <ul>
+          <li><a href="https://help.autodesk.com/cloudhelp/2023/ENU/Revit-Model/files/GUID-1929027A-B304-401E-BCDC-11ED3D3E67CE.htm">About Setting Up Shared Parameter Files</a> — Autodesk, offisiell hjelp. Hvordan filen settes opp. <span class="lng">EN</span></li>
+          <li><a href="https://help.autodesk.com/cloudhelp/2023/ENU/Revit-Model/files/GUID-E7D12B71-C50D-46D8-886B-8E0C2B285988.htm">Shared Parameters</a> — Autodesk. Hvorfor GUID gjør at en parameter er «den samme». <span class="lng">EN</span></li>
+        </ul>
+      </div>
+
+      <div class="ref-group">
+        <h4>Revit — IFC-eksport og Property Sets</h4>
+        <ul>
+          <li><a href="https://bimcorner.com/exporting-ifc-from-revit-part-3-user-defined-properties/">Exporting IFC from Revit, part 3: User-defined properties</a> — BimCorner. Praktisk gjennomgang av mappingfilen. <span class="lng">EN</span></li>
+          <li><a href="https://novedge.com/blogs/design-news/revit-tip-revit-ifc-export-parameter-mapping-and-qa-best-practices">Revit IFC Export: Parameter Mapping &amp; QA Best Practices</a> — Novedge. <span class="lng">EN</span></li>
+        </ul>
+      </div>
+
+      <div class="ref-group">
+        <h4>buildingSMART — IFC, Property Sets &amp; IDS</h4>
+        <ul>
+          <li><a href="https://technical.buildingsmart.org/standards/ifc/">Industry Foundation Classes (IFC)</a> — buildingSMART Technical. Hva IFC og property sets er. <span class="lng">EN</span></li>
+          <li><a href="https://www.buildingsmart.org/standards/bsi-standards/information-delivery-specification-ids/">Information Delivery Specification (IDS)</a> — buildingSMART. Hva IDS er (v1.0, juni 2024). <span class="lng">EN</span></li>
+          <li><a href="https://buildingsmart.no/">buildingSMART Norge</a> — norsk materiale og fagmiljø. <span class="lng">NO</span></li>
+        </ul>
+      </div>
+
+      <div class="ref-group">
+        <h4>Andre fagverktøy</h4>
+        <ul>
+          <li><a href="https://support.tekla.com/">Tekla User Assistance</a> — søk: «Create property sets for IFC export». UDA-er og IFC-eksport. <span class="lng">EN</span></li>
+          <li><a href="https://help.novapoint.com/">Novapoint / Quadri Help</a> — søk: «Export to IFC» / «Export Generic Properties». Bruk <span class="tag">|</span> i navnet. <span class="lng">EN</span></li>
+          <li><a href="https://www.aveva.com/">AVEVA E3D Design</a> — dok.: «User Defined Attributes (UDAs)» og «IFC Export Options». <span class="lng">EN</span></li>
+          <li><a href="https://www.cadmatic.com/">CADMATIC</a> — dok.: «IFC import &amp; export» (Plant Modeller) og eShare-publisering. <span class="lng">EN</span></li>
+        </ul>
+      </div>
+
+      <div class="ref-group">
+        <h4>Norske standarder &amp; byggherrekrav</h4>
+        <ul>
+          <li><a href="https://www.standard.no/">Standard Norge</a> — <strong>NS 8360-1:2023</strong> (BIM-objekter) og <strong>NS 3451</strong> (bygningsdelstabell). <span class="lng">NO</span></li>
+          <li><a href="https://simba.statsbygg.no/">Statsbygg SIMBA 2.1</a> — BIM-krav og kravdatabase (<span class="tag">statsbygg.bim-q.com</span>). <span class="lng">NO</span></li>
+          <li><a href="https://www.banenor.no/">Bane NOR — Krav til BIM</a> — <span class="tag">GEN-00-A-00005</span> og KIM. <span class="lng">NO</span></li>
+        </ul>
+      </div>
+
+      <div class="ref-group">
+        <h4>Kontroll</h4>
+        <ul>
+          <li><a href="https://www.solibri.com/">Solibri</a> — IDS-validering og modellstruktur-sjekk: at egenskaper ligger rett sted på tvers av modeller. <span class="lng">EN</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="block" style="border-top:none;padding-top:8px;">
+    <div class="closing">
+      <h2>Til slutt</h2>
+      <p>Ikke la deg skremme av at dette har vært en «svart boks» tidligere. Selve Revit-oppsettet er overraskende mekanisk når du først har gjort det én gang — noen menyer, en tekstfil og en testeksport.</p>
+      <p>Den virkelige verdien ligger i å forstå at delte parametere på tvers av fag egentlig er en <strong style="color:#fff">avtale om hvilke egenskaper som skal ligge hvor i IFC</strong>. Når du eier den forståelsen, kan du ikke bare bestille oppsettet — du kan lede det.</p>
+      <p class="sign">Lykke til, Ørjan! Spør gjerne underveis.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="print-tip">📄 For Teams: trykk Ctrl/Cmd + P → «Lagre som PDF» → legg ved i chatten.</div>
+  <div>Startguide · Delte parametere på tvers av fag (Revit · Tekla · AutoCAD 3D · Plant View · Novapoint). Lenker peker til offisiell dokumentasjon og norske standarder/byggherrekrav; enkelte tool-spesifikke sider må søkes opp på leverandørens hjelpesider.</div>
+</footer>
+
+</body>
+</html>
