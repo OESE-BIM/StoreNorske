@@ -1,80 +1,79 @@
-# MMI api — delt lagring
+# MMI api — delt lagring i GitHub
 
-Åpent api (ingen innlogging) på Azure Static Web Apps, med Azure Table Storage som lager.
-Ingenting overskrives og ingenting slettes fysisk: hver lagring legger til en ny versjon,
-og sletting setter bare et flagg.
+Åpent api (ingen innlogging) på Azure Static Web Apps. Lageret er **dette repoet**:
+hver lagring skriver prosjektfila på nytt og blir en commit, så git-historikken *er*
+revisjonssporet. Ingenting overskrives uten spor.
 
-## Sett opp (én gang)
-
-1. Lag en lagringskonto i Azure (Storage account, type StorageV2, LRS er nok).
-2. Kopier tilkoblingsstrengen: Storage account → Access keys → Connection string.
-3. Static Web App → Configuration → legg til:
-
-       AZURE_STORAGE_CONNECTION_STRING = <tilkoblingsstrengen>
-
-4. Push til `main`. Workflowen plukker opp `api/` automatisk fordi
-   `api_location` settes til `"api"` (se under).
-
-## Endring som må gjøres i workflowen
-
-I `.github/workflows/azure-static-web-apps-nice-smoke-0e7348a03.yml`:
-
-       api_location: "api"      # var ""
+Bakgrunn for valget: COWI-leietakeren har nøkkelbasert tilgang til lagringskontoer
+sperret av policy (`KeyBasedAuthenticationNotPermitted`), og Static Web Apps sine
+innebygde funksjoner har ingen identitet å autentisere med Entra ID i stedet.
+GitHub-lagring omgår begge problemene uten en eneste ny Azure-ressurs.
 
 ## Endepunkter
 
-| Metode | Rute | Hva den gjør |
+| Metode | Rute | Gjør |
 | --- | --- | --- |
-| GET | `/api/state?project=A302973` | Nyeste versjon |
-| GET | `/api/state?project=A302973&version=<v>` | En bestemt versjon |
-| PUT | `/api/state?project=A302973` | Legger til ny versjon. Body: `{ "data": {...}, "by": "Navn", "note": "" }` |
-| GET | `/api/history?project=A302973&limit=50` | Versjonsliste med sammendrag |
-| POST | `/api/mark` | Myk sletting. Body: `{ "project": "...", "version": "<v>", "by": "Navn" }` |
-| GET | `/api/projects` | Alle prosjekter i lageret |
-| GET/POST | `/api/presence` | Hvem som er inne nå. POST-body: `{ "project": "...", "id": "<klient-id>", "who": "Navn" }` — svarer med lista uansett metode |
+| GET | `/api/state?project=X` | Nyeste versjon med data |
+| GET | `/api/state?project=X&head=1` | Bare metadata — ett kall, ingen nedlasting. Konsollen poller med denne |
+| GET | `/api/state?project=X&version=<sha>` | En bestemt versjon |
+| PUT | `/api/state?project=X` | Ny versjon. Body: `{ "data": {…}, "by": "Navn", "note": "Milepæl" }` |
+| GET | `/api/history?project=X&limit=100` | Versjonsliste, nyeste først |
+| GET | `/api/projects` | Prosjektfilene som finnes i lageret |
+| GET/POST | `/api/presence` | Hvem som er inne nå. POST-body: `{ "project": "X", "id": "<klient-id>", "who": "Navn" }` |
 
-`project` er AO-nummeret. `data` er samme objekt som ligger i `.mmi.json`-fila
-(feltet `data` der), så fil og api er samme format.
+`version` er commit-sha'en.
+
+## Miljøvariabler
+
+Settes på Static Web App-en under **Settings → Environment variables**.
+
+| Navn | Påkrevd | Standard |
+| --- | --- | --- |
+| `MMI_GITHUB_TOKEN` | ja | — |
+| `MMI_REPO` | nei | `OESE-BIM/StoreNorske` |
+| `MMI_BRANCH` | nei | `main` |
+| `MMI_PATH_PREFIX` | nei | `data/mmi` |
+
+Tokenet skal være en **fine-grained personal access token** med tilgang til bare dette
+repoet og bare **Contents: Read and write**. Ingen andre rettigheter trengs.
 
 ## Datamodell
 
-En rad per lagring:
+Én fil per prosjekt: `data/mmi/<prosjekt>.json`.
 
-- **PartitionKey** — prosjekt (AO-nummer)
-- **RowKey** — 13 sifre, synkende tid, så nyeste kommer først uten sortering
-- **savedAt** — ISO-tid
-- **by** — navnet brukeren har skrevet inn i konsollen
-- **deleted** — flagg, aldri fysisk sletting
-- **payload0…N** — tilstanden som JSON, delt i biter à 30 KB
+```json
+{ "savedAt": "2026-08-30T18:00:00.000Z", "by": "Kari", "note": "Milepæl", "data": { … } }
+```
 
-## Kjør lokalt
-
-    cd api
-    npm install
-    # legg AZURE_STORAGE_CONNECTION_STRING i local.settings.json
-    func start
-
-## Nærvær
-
-Egen tabell `MmiPresence`, én rad per nettleser (`RowKey` = klient-id fra localStorage).
-Konsollen sender livstegn hvert 30. sekund; rader eldre enn 90 sekunder regnes som borte
-og ryddes bort fortløpende. Ingen historikk, ingen personopplysninger utover navnet
-brukeren selv har skrevet inn.
+Forfatter, notat og innholdstall gjentas i commit-meldingens andre avsnitt som JSON.
+Det er grunnen til at historikklista kan bygges fra commit-lista alene, uten å hente
+hver enkelt fil — ett API-kall for hele historikken i stedet for ett per versjon.
 
 ## Slik bruker konsollen api-et
 
 - Lagrer automatisk 4 sekunder etter siste endring.
-- Spør etter nyeste versjon hvert 12. sekund og henter den automatisk
-  **hvis** det ikke ligger ulagrede endringer lokalt. Ellers vises et varsel med «Hent nå».
-- «Merk milepæl» lagrer med et navn i `note`. Historikkpanelet viser navngitte
-  versjoner som standard, resten bak «vis alle versjoner».
+- Poller `?head=1` hvert 20. sekund og henter ned data bare når sha'en har endret seg,
+  og bare hvis det ikke ligger ulagrede endringer lokalt. Ellers vises «Hent nå».
+- «Merk milepæl» lagrer med navn i `note`. Historikkpanelet viser navngitte versjoner
+  som standard, resten bak «vis alle versjoner».
 - Faller tilbake til ren lokal lagring hvis api-et ikke svarer.
+
+## Grenser å kjenne
+
+- **GitHubs takgrense** er 5 000 kall i timen per token. Med polling på 20 sekunder
+  bruker hver åpne fane rundt 180 kall i timen, så det tåler godt over tjue samtidige
+  brukere. Blir det trangt, øk pollingintervallet før noe annet.
+- **Nærvær ligger i minnet** på funksjonsverten, ikke i git — et livstegn hvert 30.
+  sekund ville gitt hundrevis av tomme commits. Lista kan derfor bli ufullstendig ved
+  skalering, og nullstilles ved kaldstart. Den er pynt, og tåler det.
+- **Ingen samtidighetslås.** To som lagrer i samme sekund gir to commits, og den siste
+  vinner i fila. Pollingen fanger det opp innen 20 sekunder, og begge versjoner ligger
+  i historikken. Skal det strammes til, sender PUT med forventet sha og får 409 tilbake.
+- **Api-et er åpent.** Alle med lenken kan utløse en commit. Funksjonen skriver bare
+  under `MMI_PATH_PREFIX`, så skaden er avgrenset til datafilene.
 
 ## Neste steg, ikke bygget ennå
 
-- **Sanntid mellom brukere.** Polling er på plass (12 sekunder). Azure Web PubSub er
-  neste nivå, og bør vente til polling viser seg å ikke være nok.
-- **Excel-eksport.** Gjøres billigst i nettleseren fra samme data — ingen serverkode.
-- **Samtidighet.** `PUT` bør sende med versjonen du leste (`ifVersion`), så to
-  personer som skriver samtidig får beskjed i stedet for at siste vinner blindt.
-  Dette er den ene tingen som bør på plass før flere enn en håndfull bruker det.
+- Excel-eksport. Gjøres i nettleseren, ingen serverkode.
+- Samtidighetssjekk (forventet sha på PUT, 409 ved kollisjon).
+- Sanntid i stedet for polling, hvis 20 sekunder viser seg for tregt.

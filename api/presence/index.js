@@ -1,47 +1,32 @@
 const wrap = require('../shared/wrap');
-const { TableClient } = require('@azure/data-tables');
-const { projectOf } = require('../shared/table');
+const { projectOf } = require('../shared/gh');
 
-const TABLE = 'MmiPresence';
-const WINDOW_MS = 90000; /* hvor lenge en person regnes som inne etter siste livstegn */
-
-function client() {
-  const cs = process.env.AZURE_STORAGE_CONNECTION_STRING;
-  if (!cs) throw new Error('AZURE_STORAGE_CONNECTION_STRING mangler');
-  return TableClient.fromConnectionString(cs, TABLE);
-}
+/* Nærvær holdes i minnet på funksjonsverten. Det er bevisst: å skrive et livstegn
+   hvert 30. sekund til git ville gitt hundrevis av meningsløse commits.
+   Konsekvensen er at lista kan bli ufullstendig hvis verten skalerer til flere
+   instanser, og at den nullstilles ved kaldstart. Nærvær er pynt — det tåler det. */
+const WINDOW_MS = 90000;
+const rooms = new Map();
 
 module.exports = wrap(async function (context, req) {
   const project = projectOf(req);
-  const c = client();
-  try { await c.createTable(); } catch (e) { /* finnes allerede */ }
+  if (!rooms.has(project)) rooms.set(project, new Map());
+  const room = rooms.get(project);
 
   if (req.method === 'POST') {
-    const body = req.body || {};
-    const id = String(body.id || '').replace(/[\\/#?\t\n\r]/g, '-').slice(0, 80);
+    const b = req.body || {};
+    const id = String(b.id || '').slice(0, 80);
     if (!id) { context.res = { status: 400, body: { error: 'Mangler id' } }; return; }
-    await c.upsertEntity({
-      partitionKey: project,
-      rowKey: id,
-      who: String(body.who || '').slice(0, 120),
-      seenAt: new Date().toISOString()
-    }, 'Replace');
+    room.set(id, { who: String(b.who || '').slice(0, 120), seenAt: Date.now() });
   }
 
   const cutoff = Date.now() - WINDOW_MS;
-  const here = [];
-  const stale = [];
-  const it = c.listEntities({ queryOptions: { filter: `PartitionKey eq '${project}'` } });
-  for await (const e of it) {
-    if (new Date(e.seenAt).getTime() >= cutoff) here.push({ id: e.rowKey, who: e.who || '', seenAt: e.seenAt });
-    else stale.push(e.rowKey);
-  }
-  /* rydder gamle rader så tabellen ikke vokser i det uendelige */
-  for (const k of stale.slice(0, 20)) {
-    try { await c.deleteEntity(project, k); } catch (e) { /* allerede borte */ }
-  }
+  for (const [k, v] of room) if (v.seenAt < cutoff) room.delete(k);
 
-  here.sort((a, b) => (a.who || '').localeCompare(b.who || ''));
+  const here = [...room.entries()]
+    .map(([id, v]) => ({ id, who: v.who, seenAt: new Date(v.seenAt).toISOString() }))
+    .sort((a, b) => (a.who || '').localeCompare(b.who || ''));
+
   context.res = {
     status: 200,
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },

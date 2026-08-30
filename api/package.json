@@ -1,8 +1,5 @@
 {
   "name": "mmi-api",
-  "version": "1.0.0",
-  "description": "Delt lagring for MMI-konsollen (Azure Table Storage, append-only)",
-  "dependencies": {
-    "@azure/data-tables": "^13.2.2"
-  }
+  "version": "2.0.0",
+  "description": "Delt lagring for MMI-konsollen — GitHub som lager, én commit per versjon"
 }
