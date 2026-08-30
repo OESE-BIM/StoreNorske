@@ -1,6 +1,7 @@
+const wrap = require('../shared/wrap');
 const { client, ensure } = require('../shared/table');
 
-module.exports = async function (context, req) {
+module.exports = wrap(async function (context, req) {
   const c = client();
   await ensure(c);
   const seen = {};
@@ -10,4 +11,4 @@ module.exports = async function (context, req) {
     seen[e.partitionKey].versjoner++;
   }
   context.res = { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: { prosjekter: Object.values(seen) } };
-};
+});

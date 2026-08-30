@@ -1,3 +1,4 @@
+const wrap = require('../shared/wrap');
 const { TableClient } = require('@azure/data-tables');
 const { projectOf } = require('../shared/table');
 
@@ -10,7 +11,7 @@ function client() {
   return TableClient.fromConnectionString(cs, TABLE);
 }
 
-module.exports = async function (context, req) {
+module.exports = wrap(async function (context, req) {
   const project = projectOf(req);
   const c = client();
   try { await c.createTable(); } catch (e) { /* finnes allerede */ }
@@ -46,4 +47,4 @@ module.exports = async function (context, req) {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     body: { project, here }
   };
-};
+});

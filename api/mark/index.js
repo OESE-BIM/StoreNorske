@@ -1,7 +1,8 @@
+const wrap = require('../shared/wrap');
 const { client, ensure, projectOf } = require('../shared/table');
 
 /* Markerer en versjon som slettet. Raden blir liggende — ingenting fjernes fysisk. */
-module.exports = async function (context, req) {
+module.exports = wrap(async function (context, req) {
   const project = projectOf(req);
   const body = req.body || {};
   if (!body.version) {
@@ -22,4 +23,4 @@ module.exports = async function (context, req) {
   } catch (e) {
     context.res = { status: 404, body: { error: 'Versjonen finnes ikke' } };
   }
-};
+});

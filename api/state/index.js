@@ -1,6 +1,7 @@
+const wrap = require('../shared/wrap');
 const { client, ensure, rowKey, split, join, projectOf } = require('../shared/table');
 
-module.exports = async function (context, req) {
+module.exports = wrap(async function (context, req) {
   const project = projectOf(req);
   const c = client();
   await ensure(c);
@@ -42,7 +43,7 @@ module.exports = async function (context, req) {
 
   await c.createEntity(entity);
   context.res = ok({ project, version: entity.rowKey, savedAt: entity.savedAt, by: entity.by });
-};
+});
 
 function ok(payload) {
   return { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: payload };

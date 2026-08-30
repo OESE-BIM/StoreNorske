@@ -1,6 +1,7 @@
+const wrap = require('../shared/wrap');
 const { client, ensure, join, projectOf } = require('../shared/table');
 
-module.exports = async function (context, req) {
+module.exports = wrap(async function (context, req) {
   const project = projectOf(req);
   const limit = Math.min(Number(req.query && req.query.limit) || 50, 200);
   const c = client();
@@ -24,4 +25,4 @@ module.exports = async function (context, req) {
     if (rows.length >= limit) break;
   }
   context.res = { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: { project, versjoner: rows } };
-};
+});
