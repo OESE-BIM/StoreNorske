@@ -41,6 +41,28 @@ module.exports = wrap(async function (context, req) {
     context.res = { status: 400, body: { error: 'Mangler data' } };
     return;
   }
+
+  /* Samtidighetssjekk: klienten sender versjonen den bygger på. Har noen andre
+     lagret siden, avviser vi med 409 istedenfor å overskrive deres arbeid.
+     baseVersion === null betyr «jeg tror fila ikke finnes». Utelatt felt = ingen sjekk. */
+  if ('baseVersion' in body) {
+    const cur = await head(project);
+    const curVer = cur ? cur.version : null;
+    if ((body.baseVersion || null) !== curVer) {
+      context.res = {
+        status: 409,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+        body: {
+          error: 'Noen andre har lagret en nyere versjon',
+          version: curVer,
+          savedAt: cur ? cur.savedAt : null,
+          by: cur ? cur.by : ''
+        }
+      };
+      return;
+    }
+  }
+
   const res = await write(project, body.data, body.by, body.note);
   context.res = ok(Object.assign({ project }, res));
 });
