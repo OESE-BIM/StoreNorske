@@ -1,7 +1,7 @@
 {
- "savedAt": "2026-08-31T12:15:45.191Z",
- "by": "Harry Hole",
- "note": "test 4",
+ "savedAt": "2026-08-31T12:34:41.102Z",
+ "by": "Ørjan Sedeniussen2",
+ "note": "Avhengigheter er satt",
  "data": {
   "lang": null,
   "sp": "TAN",
@@ -22,7 +22,44 @@
   "extra": [],
   "objHidden": [],
   "logs": {},
-  "links": [],
+  "links": [
+   [
+    "T-01",
+    "F-01"
+   ],
+   [
+    "T-01",
+    "T-03"
+   ],
+   [
+    "T-01",
+    "R-01"
+   ],
+   [
+    "T-01",
+    "R-02"
+   ],
+   [
+    "R-01",
+    "R-03"
+   ],
+   [
+    "R-03",
+    "K-01"
+   ],
+   [
+    "K-01",
+    "F-03"
+   ],
+   [
+    "T-01",
+    "T-02"
+   ],
+   [
+    "T-02",
+    "T-04"
+   ]
+  ],
   "cpMeta": {},
   "ao": "AO77777",
   "projName": "REINEI",
