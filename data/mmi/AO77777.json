@@ -1,7 +1,7 @@
 {
- "savedAt": "2026-08-31T12:12:51.330Z",
+ "savedAt": "2026-08-31T12:15:19.516Z",
  "by": "Ørjan Sedeniussen2",
- "note": "Endet MMI på RIB",
+ "note": "Test 3",
  "data": {
   "lang": null,
   "sp": "TAN",
@@ -11,7 +11,7 @@
   "spDiscEdits": {},
   "spLevels": {},
   "cpEdits": {
-   "250|T-01": 225
+   "250|T-01": 175
   },
   "spStamps": {},
   "cpStamps": {
